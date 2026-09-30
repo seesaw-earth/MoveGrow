@@ -2,7 +2,7 @@
 
 The intended public repository is:
 
-`https://github.com/Seesaw2025/MoveGrow`
+`https://github.com/seesaw-earth/MoveGrow`
 
 The repository name was not found in the GitHub repository search when this package was prepared on September 29, 2026.
 
@@ -18,7 +18,7 @@ The script will:
 
 1. initialize a local `main` Git repository if needed;
 2. commit the current source;
-3. create `Seesaw2025/MoveGrow` as a **public** repository and push it;
+3. create `seesaw-earth/MoveGrow` as a **public** repository and push it;
 4. configure GitHub Pages from the `/docs` folder;
 5. print the expected privacy, support, and home URLs.
 
@@ -26,9 +26,9 @@ Do **not** create the `v1.0.0` tag until the public source exactly matches the X
 
 ## Expected public URLs
 
-- Repository: `https://github.com/Seesaw2025/MoveGrow`
-- Privacy: `https://seesaw2025.github.io/MoveGrow/privacy.html`
-- Support: `https://seesaw2025.github.io/MoveGrow/support.html`
-- Marketing/home: `https://seesaw2025.github.io/MoveGrow/`
+- Repository: `https://github.com/seesaw-earth/MoveGrow`
+- Privacy: `https://seesaw-earth.github.io/MoveGrow/privacy.html`
+- Support: `https://seesaw-earth.github.io/MoveGrow/support.html`
+- Marketing/home: `https://seesaw-earth.github.io/MoveGrow/`
 
 GitHub Pages can take a short period to become reachable after its first deployment.

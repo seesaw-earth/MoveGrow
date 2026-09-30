@@ -6,7 +6,6 @@
 	objectVersion = 70;
 	objects = {
 
-
 /* Begin PBXBuildFile section */
 		A0B1C2D3E4F5061728394A5B /* UltralyticsYOLO in Frameworks */ = {isa = PBXBuildFile; productRef = C2D3E4F5061728394A5B6C7D /* UltralyticsYOLO */; };
 /* End PBXBuildFile section */
@@ -15,8 +14,18 @@
 		A1B2C3D4E5F60718293A4B5C /* MoveGrow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoveGrow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		34E3BDFF306CA6600047058E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D69EBA5FB692F17FF0EC0A04 /* MoveGrow */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		ED35F830F6D7307AF11A3FA8 /* MoveGrow */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MoveGrow; sourceTree = "<group>"; };
+		ED35F830F6D7307AF11A3FA8 /* MoveGrow */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (34E3BDFF306CA6600047058E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = MoveGrow; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,16 +130,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXSourcesBuildPhase section */
-		659B12F3C113185D0E8237E9 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXSourcesBuildPhase section */
-
 /* Begin PBXShellScriptBuildPhase section */
 		E9F6A1C2D3E4F5061728394A /* Bundle YOLO Pose Model */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -154,24 +153,15 @@
 		};
 /* End PBXShellScriptBuildPhase section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		B1C2D3E4F5061728394A5B6C /* XCRemoteSwiftPackageReference "yolo-ios-app" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ultralytics/yolo-ios-app.git";
-			requirement = {
-				kind = exactVersion;
-				version = 8.9.15;
-			};
+/* Begin PBXSourcesBuildPhase section */
+		659B12F3C113185D0E8237E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		C2D3E4F5061728394A5B6C7D /* UltralyticsYOLO */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B1C2D3E4F5061728394A5B6C /* XCRemoteSwiftPackageReference "yolo-ios-app" */;
-			productName = UltralyticsYOLO;
-		};
-/* End XCSwiftPackageProductDependency section */
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		2A9D7E9704B099DD248AF987 /* Debug */ = {
@@ -181,13 +171,18 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5Y62DWN7RS;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Record your baby’s movement and create private, on-device memories.";
+				INFOPLIST_FILE = MoveGrow/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MoveGrow;
-				INFOPLIST_KEY_UIFileSharingEnabled = NO;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MoveGrow uses the camera to record your baby's movement videos and display an on-device skeleton overlay.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIFileSharingEnabled = NO;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -198,7 +193,6 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ziqingshi.movegrow;
 				PRODUCT_NAME = MoveGrow;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -212,13 +206,18 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5Y62DWN7RS;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Record your baby’s movement and create private, on-device memories.";
+				INFOPLIST_FILE = MoveGrow/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MoveGrow;
-				INFOPLIST_KEY_UIFileSharingEnabled = NO;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MoveGrow uses the camera to record your baby's movement videos and display an on-device skeleton overlay.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIFileSharingEnabled = NO;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -229,7 +228,6 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ziqingshi.movegrow;
 				PRODUCT_NAME = MoveGrow;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -362,6 +360,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B1C2D3E4F5061728394A5B6C /* XCRemoteSwiftPackageReference "yolo-ios-app" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ultralytics/yolo-ios-app.git";
+			requirement = {
+				kind = exactVersion;
+				version = 8.9.15;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C2D3E4F5061728394A5B6C7D /* UltralyticsYOLO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1C2D3E4F5061728394A5B6C /* XCRemoteSwiftPackageReference "yolo-ios-app" */;
+			productName = UltralyticsYOLO;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1CE4B3C10105501F6DE0F544 /* Project object */;
 }

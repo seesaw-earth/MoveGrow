@@ -29,7 +29,7 @@ Before public App Store distribution:
 1. Publish the complete corresponding MoveGrow source in a public repository (suggested repository name: `MoveGrow`).
 2. Include `LICENSE`, `THIRD_PARTY_NOTICES.md`, `Scripts/bundle-yolo-pose.sh`, project files, configuration, and all application source.
 3. Tag the exact submitted build, for example `v1.0.0-appstore-1`.
-4. Publish a stable Source Code URL and add it to project/support documentation. A natural location for the connected GitHub account would be `https://github.com/Seesaw2025/MoveGrow` if that repository is created publicly.
+4. Publish a stable Source Code URL and add it to project/support documentation. A natural location for the connected GitHub account would be `https://github.com/seesaw-earth/MoveGrow` if that repository is created publicly.
 5. Keep the exact upstream/model provenance and SHA-256 in `THIRD_PARTY_NOTICES.md`.
 6. In App Store Connect, review **App Information → License Agreement** and use an appropriate custom EULA if staying on the AGPL path.
 7. Obtain written Ultralytics clarification or other legal clearance for downstream App Store distribution; open-sourcing the project does not itself answer every App Store/AGPL compatibility question.

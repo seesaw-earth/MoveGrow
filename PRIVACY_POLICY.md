@@ -32,10 +32,10 @@ MoveGrow provides descriptive movement visualization and organization. It is not
 
 ## Open source components
 
-MoveGrow uses open-source components, including UltralyticsYOLO, under the GNU Affero General Public License v3.0. Source code and notices are published at https://github.com/Seesaw2025/MoveGrow .
+MoveGrow uses open-source components, including UltralyticsYOLO, under the GNU Affero General Public License v3.0. Source code and notices are published at https://github.com/seesaw-earth/MoveGrow .
 
 ## Support and privacy questions
 
-For support or privacy questions, use https://seesaw2025.github.io/MoveGrow/support.html . Do not post private health information, baby videos, or other sensitive personal information in a public GitHub issue.
+For support or privacy questions, use https://seesaw-earth.github.io/MoveGrow/support.html . Do not post private health information, baby videos, or other sensitive personal information in a public GitHub issue.
 
 The developer and App Store seller is **Ziqing Shi**.

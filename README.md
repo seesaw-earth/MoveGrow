@@ -34,13 +34,13 @@ MoveGrow produces descriptive movement visualization and organization. It is **n
 
 ## Public source and support
 
-Planned public repository: `https://github.com/Seesaw2025/MoveGrow`
+Planned public repository: `https://github.com/seesaw-earth/MoveGrow`
 
 After GitHub Pages is enabled from `/docs` on the `main` branch:
 
-- Privacy: `https://seesaw2025.github.io/MoveGrow/privacy.html`
-- Support: `https://seesaw2025.github.io/MoveGrow/support.html`
-- Marketing/home: `https://seesaw2025.github.io/MoveGrow/`
+- Privacy: `https://seesaw-earth.github.io/MoveGrow/privacy.html`
+- Support: `https://seesaw-earth.github.io/MoveGrow/support.html`
+- Marketing/home: `https://seesaw-earth.github.io/MoveGrow/`
 
 Tag the exact App Store build (recommended tag: `v1.0.0`) before public release. See `APP_STORE_SUBMISSION.md`.
 

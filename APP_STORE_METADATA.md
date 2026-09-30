@@ -18,10 +18,10 @@
 
 ## Public URLs after GitHub Pages is enabled
 
-- **Privacy Policy URL:** `https://seesaw2025.github.io/MoveGrow/privacy.html`
-- **Support URL:** `https://seesaw2025.github.io/MoveGrow/support.html`
-- **Marketing URL:** `https://seesaw2025.github.io/MoveGrow/`
-- **Source Code:** `https://github.com/Seesaw2025/MoveGrow`
+- **Privacy Policy URL:** `https://seesaw-earth.github.io/MoveGrow/privacy.html`
+- **Support URL:** `https://seesaw-earth.github.io/MoveGrow/support.html`
+- **Marketing URL:** `https://seesaw-earth.github.io/MoveGrow/`
+- **Source Code:** `https://github.com/seesaw-earth/MoveGrow`
 
 ## Subtitle
 
@@ -75,7 +75,7 @@ Medical positioning:
 MoveGrow provides descriptive movement visualization and organization only. It is not a screening test, diagnosis, treatment recommendation, or medical device.
 
 Open source:
-MoveGrow is distributed under AGPL-3.0. Corresponding source and third-party notices are published at https://github.com/Seesaw2025/MoveGrow .
+MoveGrow is distributed under AGPL-3.0. Corresponding source and third-party notices are published at https://github.com/seesaw-earth/MoveGrow .
 
 ## App Privacy answer planned for v1.0
 

@@ -137,15 +137,15 @@ struct SettingsView: View {
             }
             Section("Privacy") {
                 NavigationLink("Privacy overview") { MoveGrowPrivacyView() }
-                Link("Privacy policy", destination: URL(string:"https://seesaw2025.github.io/MoveGrow/privacy.html")!)
-                Link("Support", destination: URL(string:"https://seesaw2025.github.io/MoveGrow/support.html")!)
+                Link("Privacy policy", destination: URL(string:"https://seesaw-earth.github.io/MoveGrow/privacy.html")!)
+                Link("Support", destination: URL(string:"https://seesaw-earth.github.io/MoveGrow/support.html")!)
             }
             Section("About MoveGrow") {
                 LabeledContent("Version", value: "1.0")
                 LabeledContent("Developer", value: "Ziqing Shi")
                 Text("© 2026 Ziqing Shi").font(.caption).foregroundStyle(.secondary)
                 NavigationLink("Open source & licenses") { MoveGrowOpenSourceView() }
-                Link("MoveGrow source code", destination: URL(string:"https://github.com/Seesaw2025/MoveGrow")!)
+                Link("MoveGrow source code", destination: URL(string:"https://github.com/seesaw-earth/MoveGrow")!)
             }
         }.navigationTitle("Settings").toolbar { Button("Done") { dismiss() } }
     }
