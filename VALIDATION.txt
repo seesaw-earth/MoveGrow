@@ -1,0 +1,21 @@
+Validation prepared 2026-09-29 — MoveGrow 1.0 (1) AGPL submission candidate
+
+IMPLEMENTED: public-facing rebrand from Little Moves to MoveGrow.
+IMPLEMENTED: app display name MoveGrow; App Store working name MoveGrow: Baby Milestones.
+IMPLEMENTED: marketing version 1.0, build 1, Bundle ID com.ziqingshi.movegrow.
+IMPLEMENTED: developer/copyright attribution Ziqing Shi in the app About view and source notices.
+IMPLEMENTED: complete application source licensed AGPL-3.0 with LICENSE, SPDX headers and THIRD_PARTY_NOTICES.md.
+IMPLEMENTED: UltralyticsYOLO remains pinned to 8.9.15.
+IMPLEMENTED: YOLO26l-pose changed from first-use runtime download to build-time bundling.
+IMPLEMENTED: build script pins the official v8.3.0 asset and SHA-256 4e576806e5ce6cfba83ae456c7814336c0161e92b9cff59e873bf0c8b1efe777, then compiles it into the app bundle.
+IMPLEMENTED: installed app no longer requires network access to fetch its pose model.
+IMPLEMENTED: Apple Vision remains the offline fallback if the bundled YOLO model cannot load.
+IMPLEMENTED: prior single-largest-person selection, raw/processed pose archives, live skeleton, aligned playback skeleton, and skeleton clip export retained.
+IMPLEMENTED: MoveGrow local Application Support directory with automatic migration from the prior LittleMoves directory.
+IMPLEMENTED: initial opaque 1024x1024 MoveGrow App Icon asset.
+IMPLEMENTED: in-app Privacy overview and Open Source & Licenses views.
+IMPLEMENTED: PRIVACY_POLICY.md and APP_STORE_SUBMISSION.md for publication/submission preparation.
+
+REQUIRES MAC/XCODE VALIDATION: Swift Package resolution, build phase network download, Core ML compilation/bundle placement, code signing, iOS simulator/device build, AVFoundation/Vision/CoreML runtime execution, and TestFlight acceptance.
+
+REQUIRES EXTERNAL RELEASE STEP: publish the exact complete corresponding source in a public repository before App Store distribution and provide a stable source-code URL.
