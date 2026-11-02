@@ -1,0 +1,1477 @@
+{
+  "schema": "movegrow.motor-rules/0.1",
+  "_note": "Descriptive, non-diagnostic rules compiled from clinical text (see sources.json). Every threshold carries its origin: 'literature' (taken from the cited description) or 'engineering_prior' (our starting value, to be calibrated). Severity: info < note < discuss < safety. 'safety' rules show safety-net guidance; they never state a diagnosis.",
+  "rules": [
+    {
+      "id": "rhythm.fast_fine",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "rhythm",
+      "analysis": "spectral",
+      "band": "fast",
+      "name": {
+        "zh": "快速、细小的节律性抖动",
+        "en": "Fast, fine rhythmic shaking"
+      },
+      "requires": {
+        "min_fps": 24,
+        "series": "raw",
+        "context_exclude": [
+          "held"
+        ],
+        "joints": [
+          "leftShoulder",
+          "rightShoulder",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "f_lo": {
+          "value": 6.0,
+          "unit": "Hz",
+          "origin": "literature",
+          "source": "S01"
+        },
+        "f_hi": {
+          "value": 12.0,
+          "unit": "Hz",
+          "origin": "engineering_prior",
+          "note": "upper search bound; needs fs >= 24 Hz"
+        },
+        "min_prom_db": {
+          "value": 8.0,
+          "unit": "dB",
+          "origin": "engineering_prior",
+          "note": "spectral peak over local median (keypoint jitter is broadband)"
+        },
+        "min_rhythm": {
+          "value": 0.4,
+          "unit": "r",
+          "origin": "engineering_prior"
+        },
+        "max_p2p_cm": {
+          "value": 3.0,
+          "unit": "cm",
+          "origin": "literature",
+          "source": "S01",
+          "note": "converted from torso units with torso_cm prior"
+        },
+        "min_p2p_torso": {
+          "value": 0.012,
+          "unit": "torso",
+          "origin": "engineering_prior",
+          "note": "below this the peak is indistinguishable from keypoint jitter"
+        },
+        "max_rigid_r2": {
+          "value": 0.6,
+          "unit": "R2",
+          "origin": "engineering_prior",
+          "note": "reject windows where one similarity motion explains the shaking (camera shake)"
+        }
+      },
+      "window_predicate": {
+        "all": [
+          {
+            "f": "peak_hz",
+            "op": "between",
+            "v": [
+              "$f_lo",
+              "$f_hi"
+            ]
+          },
+          {
+            "f": "prominence_db",
+            "op": ">=",
+            "v": "$min_prom_db"
+          },
+          {
+            "f": "rhythmicity",
+            "op": ">=",
+            "v": "$min_rhythm"
+          },
+          {
+            "f": "amp_p2p_cm",
+            "op": "<=",
+            "v": "$max_p2p_cm"
+          },
+          {
+            "f": "amp_p2p",
+            "op": ">=",
+            "v": "$min_p2p_torso"
+          },
+          {
+            "f": "rigid_r2",
+            "op": "<=",
+            "v": "$max_rigid_r2"
+          }
+        ]
+      },
+      "episode": {
+        "min_duration_s": 3.0,
+        "merge_gap_s": 0.5,
+        "freq_tol_hz": 1.0,
+        "note": "engineering prior: >=3 overlapping 2-s windows with a stable peak frequency; isolated noise peaks wander in frequency"
+      },
+      "laterality": "any",
+      "severity": "note",
+      "message": {
+        "zh": "{t0:.0f}–{t1:.0f} 秒：{limbs_zh}出现约 {hz:.1f} Hz 的细小节律性抖动，持续约 {dur:.1f} 秒（{laterality_zh}）。",
+        "en": "{t0:.0f}–{t1:.0f} s: fine rhythmic shaking of the {limbs_en} at about {hz:.1f} Hz for {dur:.1f} s ({laterality_en})."
+      },
+      "explain": {
+        "zh": "这与文献对新生儿细震颤 / jitteriness 的描述相符：频率高于 6 Hz、幅度小于约 3 cm，常见于健康新生儿，常两侧对称。区分它与抽搐的关键是：轻柔握住肢体时是否停止。",
+        "en": "This matches published descriptions of newborn fine tremor or jitteriness: faster than 6 Hz and smaller than about 3 cm, common in healthy newborns and often on both sides. The key difference from a seizure is whether it stops when the limb is gently held."
+      },
+      "followup": {
+        "zh": "下次出现时，请轻柔握住那只手或脚。停下来通常说明是良性抖动；如果握住也不停、伴随眼神凝视或面色/呼吸变化，请及时就医，并把这段视频给医生看。",
+        "en": "Next time it happens, gently hold that hand or foot. If it stops, it is usually benign jitteriness. If it keeps going while held, or comes with staring or a change in colour or breathing, seek medical care and show this video."
+      },
+      "sources": [
+        "S01",
+        "S02",
+        "S04"
+      ]
+    },
+    {
+      "id": "rhythm.coarse",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "rhythm",
+      "analysis": "spectral",
+      "band": "fast",
+      "name": {
+        "zh": "较粗大的节律性抖动",
+        "en": "Coarse rhythmic shaking"
+      },
+      "requires": {
+        "min_fps": 24,
+        "series": "raw",
+        "context_exclude": [
+          "held"
+        ],
+        "joints": [
+          "leftShoulder",
+          "rightShoulder",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "f_lo": {
+          "value": 4.5,
+          "unit": "Hz",
+          "origin": "engineering_prior",
+          "note": "fast-band filter starts at 4 Hz; slower rhythms go to rhythm.slow_*"
+        },
+        "f_hi": {
+          "value": 12.0,
+          "unit": "Hz",
+          "origin": "engineering_prior"
+        },
+        "coarse_f_below": {
+          "value": 6.0,
+          "unit": "Hz",
+          "origin": "literature",
+          "source": "S01"
+        },
+        "coarse_p2p_cm": {
+          "value": 3.0,
+          "unit": "cm",
+          "origin": "literature",
+          "source": "S01"
+        },
+        "min_prom_db": {
+          "value": 8.0,
+          "unit": "dB",
+          "origin": "engineering_prior"
+        },
+        "min_rhythm": {
+          "value": 0.4,
+          "unit": "r",
+          "origin": "engineering_prior"
+        },
+        "max_rigid_r2": {
+          "value": 0.6,
+          "unit": "R2",
+          "origin": "engineering_prior"
+        },
+        "min_p2p_torso": {
+          "value": 0.012,
+          "unit": "torso",
+          "origin": "engineering_prior"
+        }
+      },
+      "window_predicate": {
+        "all": [
+          {
+            "f": "peak_hz",
+            "op": "between",
+            "v": [
+              "$f_lo",
+              "$f_hi"
+            ]
+          },
+          {
+            "f": "prominence_db",
+            "op": ">=",
+            "v": "$min_prom_db"
+          },
+          {
+            "f": "rhythmicity",
+            "op": ">=",
+            "v": "$min_rhythm"
+          },
+          {
+            "f": "rigid_r2",
+            "op": "<=",
+            "v": "$max_rigid_r2"
+          },
+          {
+            "f": "amp_p2p",
+            "op": ">=",
+            "v": "$min_p2p_torso"
+          },
+          {
+            "any": [
+              {
+                "f": "peak_hz",
+                "op": "<",
+                "v": "$coarse_f_below"
+              },
+              {
+                "f": "amp_p2p_cm",
+                "op": ">",
+                "v": "$coarse_p2p_cm"
+              }
+            ]
+          }
+        ]
+      },
+      "episode": {
+        "min_duration_s": 3.0,
+        "merge_gap_s": 0.5,
+        "freq_tol_hz": 1.0,
+        "note": "engineering prior: >=3 overlapping 2-s windows with a stable peak frequency; isolated noise peaks wander in frequency"
+      },
+      "laterality": "any",
+      "severity": "discuss",
+      "message": {
+        "zh": "{t0:.0f}–{t1:.0f} 秒：{limbs_zh}出现约 {hz:.1f} Hz、幅度约 {p2p_cm:.1f} cm 的较粗大节律性抖动，持续约 {dur:.1f} 秒。",
+        "en": "{t0:.0f}–{t1:.0f} s: coarse rhythmic shaking of the {limbs_en} at about {hz:.1f} Hz, ~{p2p_cm:.1f} cm, for {dur:.1f} s."
+      },
+      "explain": {
+        "zh": "文献把频率较低、幅度较大的震颤称为粗震颤；与细震颤相比，它和安抚后仍不缓解的抖动一样，更值得让医生看看。幅度换算成厘米依赖身长先验，只是粗略估计。",
+        "en": "Lower-frequency, larger-amplitude shaking is described as coarse tremor. Like shaking that does not settle with soothing, it is worth showing to a doctor. The size in centimetres relies on a body-size assumption and is only approximate."
+      },
+      "followup": {
+        "zh": "请试着轻柔握住肢体或安抚宝宝，看是否停止；把这段视频带给儿科医生。若握住也不停或伴随凝视、面色/呼吸变化，请及时就医。",
+        "en": "Try gently holding the limb or soothing your baby to see whether it stops, and bring this video to your paediatrician. If it continues while held, or comes with staring or a change in colour or breathing, seek medical care."
+      },
+      "sources": [
+        "S01",
+        "S04"
+      ]
+    },
+    {
+      "id": "rhythm.slow_bout",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "rhythm",
+      "analysis": "spectral",
+      "band": "slow",
+      "aggregate": true,
+      "name": {
+        "zh": "节律性踢腿 / 挥手",
+        "en": "Rhythmic kicking / waving bouts"
+      },
+      "requires": {
+        "min_fps": 24,
+        "series": "raw",
+        "context_exclude": [
+          "held"
+        ],
+        "joints": [
+          "leftShoulder",
+          "rightShoulder",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "f_lo": {
+          "value": 0.75,
+          "unit": "Hz",
+          "origin": "engineering_prior"
+        },
+        "f_hi": {
+          "value": 4.5,
+          "unit": "Hz",
+          "origin": "engineering_prior"
+        },
+        "min_prom_db": {
+          "value": 6.0,
+          "unit": "dB",
+          "origin": "engineering_prior"
+        },
+        "min_rhythm": {
+          "value": 0.35,
+          "unit": "r",
+          "origin": "engineering_prior"
+        },
+        "min_p2p_torso": {
+          "value": 0.15,
+          "unit": "torso",
+          "origin": "engineering_prior"
+        },
+        "max_rigid_r2": {
+          "value": 0.6,
+          "unit": "R2",
+          "origin": "engineering_prior"
+        }
+      },
+      "window_predicate": {
+        "all": [
+          {
+            "f": "peak_hz",
+            "op": "between",
+            "v": [
+              "$f_lo",
+              "$f_hi"
+            ]
+          },
+          {
+            "f": "prominence_db",
+            "op": ">=",
+            "v": "$min_prom_db"
+          },
+          {
+            "f": "rhythmicity",
+            "op": ">=",
+            "v": "$min_rhythm"
+          },
+          {
+            "f": "amp_p2p",
+            "op": ">=",
+            "v": "$min_p2p_torso"
+          },
+          {
+            "f": "rigid_r2",
+            "op": "<=",
+            "v": "$max_rigid_r2"
+          }
+        ]
+      },
+      "episode": {
+        "min_duration_s": 4.0,
+        "merge_gap_s": 1.0,
+        "note": "4 s window at >=0.75 Hz covers >=3 cycles (Thelen's 'at least three times')",
+        "freq_tol_hz": 0.5
+      },
+      "laterality": "any",
+      "severity": "info",
+      "message": {
+        "zh": "本次有 {n} 段节律性动作（共约 {total_s:.0f} 秒，典型频率 {hz:.1f} Hz），主要在{limbs_zh}。",
+        "en": "{n} rhythmic bouts ({total_s:.0f} s total, typical {hz:.1f} Hz), mostly {limbs_en}."
+      },
+      "explain": {
+        "zh": "有节律的踢腿、挥手、摇晃是婴儿正常运动发展的一部分，不同动作在不同月龄最常见。这里只是记录，便于看长期变化。",
+        "en": "Rhythmic kicking, waving and rocking are a normal part of infant motor development, and different rhythms peak at different ages. This is recorded so you can see changes over time."
+      },
+      "sources": [
+        "S10"
+      ]
+    },
+    {
+      "id": "rhythm.slow_unilateral_sustained",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "rhythm",
+      "analysis": "spectral",
+      "band": "slow",
+      "name": {
+        "zh": "一侧肢体持续的规律抽动",
+        "en": "Sustained one-sided rhythmic jerking"
+      },
+      "requires": {
+        "min_fps": 24,
+        "series": "raw",
+        "context_exclude": [
+          "held"
+        ],
+        "joints": [
+          "leftShoulder",
+          "rightShoulder",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "f_lo": {
+          "value": 1.0,
+          "unit": "Hz",
+          "origin": "literature",
+          "source": "S02"
+        },
+        "f_hi": {
+          "value": 4.0,
+          "unit": "Hz",
+          "origin": "literature",
+          "source": "S02"
+        },
+        "min_prom_db": {
+          "value": 8.0,
+          "unit": "dB",
+          "origin": "engineering_prior"
+        },
+        "min_rhythm": {
+          "value": 0.5,
+          "unit": "r",
+          "origin": "engineering_prior"
+        },
+        "min_p2p_torso": {
+          "value": 0.08,
+          "unit": "torso",
+          "origin": "engineering_prior"
+        },
+        "max_contra_ratio": {
+          "value": 0.25,
+          "unit": "power ratio",
+          "origin": "engineering_prior",
+          "note": "homologous limb power at the same frequency; 'one limb or one side' (S02)"
+        },
+        "max_rigid_r2": {
+          "value": 0.6,
+          "unit": "R2",
+          "origin": "engineering_prior"
+        }
+      },
+      "window_predicate": {
+        "all": [
+          {
+            "f": "peak_hz",
+            "op": "between",
+            "v": [
+              "$f_lo",
+              "$f_hi"
+            ]
+          },
+          {
+            "f": "prominence_db",
+            "op": ">=",
+            "v": "$min_prom_db"
+          },
+          {
+            "f": "rhythmicity",
+            "op": ">=",
+            "v": "$min_rhythm"
+          },
+          {
+            "f": "amp_p2p",
+            "op": ">=",
+            "v": "$min_p2p_torso"
+          },
+          {
+            "f": "contra_ratio",
+            "op": "<=",
+            "v": "$max_contra_ratio"
+          },
+          {
+            "f": "rigid_r2",
+            "op": "<=",
+            "v": "$max_rigid_r2"
+          }
+        ]
+      },
+      "episode": {
+        "min_duration_s": 10.0,
+        "merge_gap_s": 1.0,
+        "note": "engineering prior; normal rhythmic bouts are usually shorter and involve both sides",
+        "freq_tol_hz": 0.5
+      },
+      "laterality": "unilateral",
+      "severity": "safety",
+      "message": {
+        "zh": "{t0:.0f}–{t1:.0f} 秒：{limbs_zh}出现约 {hz:.1f} Hz 的规律性抽动，持续约 {dur:.0f} 秒，而另一侧相对安静。",
+        "en": "{t0:.0f}–{t1:.0f} s: regular jerking of the {limbs_en} at about {hz:.1f} Hz for {dur:.0f} s while the other side stayed relatively quiet."
+      },
+      "explain": {
+        "zh": "临床指南把“一侧肢体以每秒 1–4 次规律抽动、握住也不停”描述为需要和抽搐区分的情况；正常的节律性踢腿通常两侧都参与、也会被安抚或握住打断。App 无法判断这是不是抽搐。",
+        "en": "Clinical guidance describes one limb or one side jerking regularly 1–4 times per second, not stopping when held, as something to tell apart from a seizure. Normal rhythmic kicking usually involves both sides and can be interrupted by soothing or holding. The app cannot tell whether this was a seizure."
+      },
+      "followup": {
+        "zh": "如果再次出现：轻柔握住并换个姿势，看是否停止；记下持续时间并录像。若握住也不停、伴随凝视或面色/呼吸改变，请立即就医；持续 5 分钟以上请呼叫急救。",
+        "en": "If it happens again: gently hold and reposition the limb to see if it stops, note how long it lasts and record it. If it continues while held, or comes with staring or a change in colour or breathing, seek medical care now; if it lasts 5 minutes or more, call emergency services."
+      },
+      "sources": [
+        "S02",
+        "S03",
+        "S04",
+        "S10"
+      ]
+    },
+    {
+      "id": "burst.spasm_like_cluster",
+      "version": "0.1",
+      "status": "research",
+      "family": "burst",
+      "analysis": "burst",
+      "name": {
+        "zh": "成串出现的短暂同步动作",
+        "en": "Clusters of brief synchronous movements"
+      },
+      "requires": {
+        "min_fps": 15,
+        "series": "smoothed",
+        "context_exclude": [
+          "held"
+        ],
+        "joints": [
+          "leftShoulder",
+          "rightShoulder",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "abs_speed": {
+          "value": 0.8,
+          "unit": "torso/s",
+          "origin": "engineering_prior"
+        },
+        "rel_speed": {
+          "value": 4.0,
+          "unit": "x session median",
+          "origin": "engineering_prior"
+        },
+        "sync_tol_s": {
+          "value": 0.15,
+          "unit": "s",
+          "origin": "engineering_prior",
+          "note": "'synchronous' (S06)"
+        },
+        "min_limbs": {
+          "value": 3,
+          "unit": "limbs",
+          "origin": "engineering_prior",
+          "note": "'bilateral' (S06)"
+        },
+        "min_dur_s": {
+          "value": 0.25,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "max_dur_s": {
+          "value": 3.0,
+          "unit": "s",
+          "origin": "literature",
+          "source": "S05",
+          "note": "S05: generally 1-3 s; S06: up to ~5 s"
+        },
+        "pre_quiet_ratio": {
+          "value": 0.35,
+          "unit": "ratio",
+          "origin": "engineering_prior",
+          "note": "'sudden': preceding 0.5-2 s much quieter than the event"
+        },
+        "min_interval_s": {
+          "value": 2.0,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "max_interval_s": {
+          "value": 60.0,
+          "unit": "s",
+          "origin": "literature",
+          "source": "S06"
+        },
+        "min_cluster": {
+          "value": 3,
+          "unit": "events",
+          "origin": "engineering_prior"
+        },
+        "require_pair": {
+          "value": true,
+          "unit": "bool",
+          "origin": "literature",
+          "source": "S06",
+          "note": "'bilateral': both arms or both legs take part"
+        },
+        "max_median_interval_s": {
+          "value": 20.0,
+          "unit": "s",
+          "origin": "engineering_prior",
+          "note": "S05 describes repeats every 5-10 s; 20 s leaves margin"
+        },
+        "max_surrogate_p": {
+          "value": 0.05,
+          "unit": "p",
+          "origin": "engineering_prior",
+          "note": "cluster must be larger than chance coincidences of the same baby's ordinary limb movements (limb-wise circular-shift surrogates)"
+        },
+        "require_axial": {
+          "value": true,
+          "unit": "bool",
+          "origin": "literature",
+          "source": "S06",
+          "note": "axial involvement: S06 'axial muscle groups', S07 'drop head / bend forward'"
+        },
+        "min_axial": {
+          "value": 0.05,
+          "unit": "torso",
+          "origin": "engineering_prior",
+          "note": "change of head-to-shoulder distance or projected torso length vs the preceding 1.5 s"
+        }
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "largest_cluster",
+            "op": ">=",
+            "v": "$min_cluster"
+          },
+          {
+            "f": "cluster_median_interval_s",
+            "op": "<=",
+            "v": "$max_median_interval_s"
+          },
+          {
+            "f": "surrogate_p",
+            "op": "<=",
+            "v": "$max_surrogate_p"
+          }
+        ]
+      },
+      "age_weeks": {
+        "min": 4,
+        "max": 104,
+        "source": "S05"
+      },
+      "severity": "safety",
+      "message": {
+        "zh": "检测到 {n} 次成串出现的短暂、四肢几乎同时的突然动作（每次约 {dur:.1f} 秒，间隔约 {iv:.0f} 秒）。",
+        "en": "{n} brief, sudden, near-synchronous movements occurred in a cluster (~{dur:.1f} s each, ~{iv:.0f} s apart)."
+      },
+      "explain": {
+        "zh": "医学资料把婴儿痉挛描述为成串出现、每次约 1–3 秒的突然屈曲或伸展，间隔通常不到 1 分钟，常在入睡或醒来时出现；它需要尽快由医生评估，家长拍的视频对诊断很有帮助。单次的惊跳不会触发这条规则（至少需要 3 次成串）。App 无法做出诊断。",
+        "en": "Medical sources describe infantile spasms as clusters of sudden bends or stiffenings lasting about 1–3 seconds each, usually less than a minute apart, often when falling asleep or waking. They need prompt assessment by a doctor, and parent videos help. A single startle does not trigger this check (it needs at least 3 in a cluster). The app cannot make a diagnosis."
+      },
+      "followup": {
+        "zh": "如果这与你在现场看到的相符，请尽快联系儿科医生并出示这段视频（App 可以导出带时间点的片段）。",
+        "en": "If this matches what you saw, contact your paediatrician soon and show them this video (you can export the clip with its time stamps)."
+      },
+      "sources": [
+        "S05",
+        "S06",
+        "S07"
+      ]
+    },
+    {
+      "id": "posture.head_preference",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "posture",
+      "analysis": "posture_side",
+      "name": {
+        "zh": "头部总是转向同一侧",
+        "en": "Head-turn side preference"
+      },
+      "requires": {
+        "min_fps": 5,
+        "series": "smoothed",
+        "context": [
+          "supine"
+        ],
+        "joints": [
+          "nose",
+          "leftShoulder",
+          "rightShoulder",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.5
+      },
+      "params": {
+        "turn_thr": {
+          "value": 0.5,
+          "unit": "sin(yaw)",
+          "origin": "engineering_prior",
+          "note": "~30 degrees"
+        },
+        "min_observed_s": {
+          "value": 60,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "min_turned_frac": {
+          "value": 0.4,
+          "unit": "fraction",
+          "origin": "engineering_prior"
+        },
+        "min_abs_pi": {
+          "value": 0.6,
+          "unit": "index",
+          "origin": "engineering_prior",
+          "note": "(T_left - T_right)/(T_left + T_right)"
+        }
+      },
+      "side_signal": {
+        "f": "head_yaw_sin",
+        "thr": "$turn_thr"
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "observed_s",
+            "op": ">=",
+            "v": "$min_observed_s"
+          },
+          {
+            "f": "turned_frac",
+            "op": ">=",
+            "v": "$min_turned_frac"
+          },
+          {
+            "f": "pref_index",
+            "op": "abs>=",
+            "v": "$min_abs_pi"
+          }
+        ]
+      },
+      "longitudinal": {
+        "min_sessions": 3,
+        "min_span_days": 7,
+        "same_direction": true,
+        "severity": "discuss"
+      },
+      "severity": "note",
+      "message": {
+        "zh": "本次转头时有 {pct:.0f}% 的时间朝向宝宝的{side_zh}（偏好指数 {pi:+.2f}，有效观察 {obs:.0f} 秒）。",
+        "en": "When the head was turned, {pct:.0f}% of the time it faced the baby's {side_en} (preference index {pi:+.2f}, {obs:.0f} s observed)."
+      },
+      "explain": {
+        "zh": "斜颈和体位性偏头的描述里，常见头一直偏向一侧、转向另一侧较少。单次录像容易受玩具或家长位置影响，所以只有多次、跨天都偏向同一侧才会提示与医生讨论。",
+        "en": "Descriptions of torticollis and positional preference include a head that keeps turning to one side and turns less to the other. A single recording is easily influenced by where toys or people are, so only a preference seen across several days suggests talking to a clinician."
+      },
+      "followup": {
+        "zh": "下次录像时把玩具或你自己放在宝宝较少看的那一侧，看看宝宝能否主动转过去；如果多次都偏向同一侧，可以和儿科医生或物理治疗师聊聊。",
+        "en": "Next time, place a toy or yourself on the side your baby looks at less and see whether they turn that way. If several recordings show the same side, consider mentioning it to your paediatrician or a physiotherapist."
+      },
+      "sources": [
+        "S12"
+      ]
+    },
+    {
+      "id": "posture.head_tilt",
+      "version": "0.1",
+      "status": "research",
+      "family": "posture",
+      "analysis": "posture_stat",
+      "name": {
+        "zh": "头部持续向一侧歪",
+        "en": "Persistent head tilt"
+      },
+      "requires": {
+        "min_fps": 5,
+        "series": "smoothed",
+        "context": [
+          "supine"
+        ],
+        "joints": [
+          "leftEye",
+          "rightEye",
+          "leftShoulder",
+          "rightShoulder"
+        ],
+        "min_coverage": 0.4
+      },
+      "params": {
+        "min_observed_s": {
+          "value": 30,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "min_abs_median_deg": {
+          "value": 10.0,
+          "unit": "deg",
+          "origin": "engineering_prior",
+          "note": "eye line vs shoulder line (S12); needs calibration"
+        }
+      },
+      "stat_signal": {
+        "f": "head_tilt_deg"
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "observed_s",
+            "op": ">=",
+            "v": "$min_observed_s"
+          },
+          {
+            "f": "median",
+            "op": "abs>=",
+            "v": "$min_abs_median_deg"
+          }
+        ]
+      },
+      "longitudinal": {
+        "min_sessions": 3,
+        "min_span_days": 7,
+        "same_direction": true,
+        "severity": "discuss"
+      },
+      "severity": "note",
+      "message": {
+        "zh": "本次眼睛连线相对肩线的中位倾斜约 {median:+.0f}°（头偏向宝宝的{side_zh}肩），有效观察 {obs:.0f} 秒。",
+        "en": "Median eye-line vs shoulder-line tilt {median:+.0f} deg (toward the baby's {side_en} shoulder), {obs:.0f} s observed."
+      },
+      "explain": {
+        "zh": "照片测量“习惯性头偏斜”（眼线与肩线夹角）是斜颈随访里用过的方法；这里的 2D 估计受拍摄角度影响，属于研究功能。",
+        "en": "Habitual head tilt (the angle between the eye line and the shoulder line) has been measured from photos when following torticollis. This 2D estimate depends on camera angle, so it is a research feature."
+      },
+      "sources": [
+        "S12"
+      ]
+    },
+    {
+      "id": "posture.atnr_like_persistent",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "posture",
+      "analysis": "posture",
+      "name": {
+        "zh": "击剑样姿势（ATNR 样）持续出现",
+        "en": "ATNR-like (fencing) posture"
+      },
+      "requires": {
+        "min_fps": 5,
+        "series": "smoothed",
+        "context": [
+          "supine"
+        ],
+        "joints": [
+          "nose",
+          "leftShoulder",
+          "rightShoulder",
+          "leftElbow",
+          "rightElbow",
+          "leftWrist",
+          "rightWrist"
+        ],
+        "min_coverage": 0.5
+      },
+      "params": {
+        "yaw_thr": {
+          "value": 0.6,
+          "unit": "sin(yaw)",
+          "origin": "engineering_prior"
+        },
+        "face_elbow_min": {
+          "value": 140,
+          "unit": "deg",
+          "origin": "engineering_prior",
+          "note": "face-side arm extended (S11)"
+        },
+        "occiput_elbow_max": {
+          "value": 100,
+          "unit": "deg",
+          "origin": "engineering_prior",
+          "note": "occiput-side arm flexed (S11)"
+        },
+        "min_turned_s": {
+          "value": 20,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "min_frac_of_turned": {
+          "value": 0.5,
+          "unit": "fraction",
+          "origin": "engineering_prior"
+        },
+        "min_episodes": {
+          "value": 2,
+          "unit": "episodes",
+          "origin": "engineering_prior"
+        }
+      },
+      "frame_predicate": {
+        "all": [
+          {
+            "f": "abs_head_yaw_sin",
+            "op": ">=",
+            "v": "$yaw_thr"
+          },
+          {
+            "f": "face_side_elbow",
+            "op": ">=",
+            "v": "$face_elbow_min"
+          },
+          {
+            "f": "occiput_side_elbow",
+            "op": "<=",
+            "v": "$occiput_elbow_max"
+          }
+        ]
+      },
+      "denominator_predicate": {
+        "f": "abs_head_yaw_sin",
+        "op": ">=",
+        "v": "$yaw_thr"
+      },
+      "episode": {
+        "min_duration_s": 3.0,
+        "merge_gap_s": 0.5
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "denominator_s",
+            "op": ">=",
+            "v": "$min_turned_s"
+          },
+          {
+            "f": "frac_of_denominator",
+            "op": ">=",
+            "v": "$min_frac_of_turned"
+          },
+          {
+            "f": "n_episodes",
+            "op": ">=",
+            "v": "$min_episodes"
+          }
+        ]
+      },
+      "age_weeks": {
+        "min": 26,
+        "below_min_status": "expected_for_age",
+        "source": "S11"
+      },
+      "severity_by_age": [
+        {
+          "min_weeks": 26,
+          "severity": "note"
+        },
+        {
+          "min_weeks": 39,
+          "severity": "discuss"
+        }
+      ],
+      "longitudinal": {
+        "min_sessions": 3,
+        "min_span_days": 7,
+        "same_direction": false,
+        "severity": "discuss"
+      },
+      "severity": "note",
+      "message": {
+        "zh": "转头时有 {pct:.0f}% 的时间呈击剑样姿势（脸朝向一侧手臂伸直、另一侧手臂屈曲），共 {n} 段。",
+        "en": "ATNR-like fencing posture during {pct:.0f}% of head-turned time ({n} episodes)."
+      },
+      "message_expected": {
+        "zh": "看到击剑样（ATNR 样）姿势。它在 1–4 个月最明显，通常 3–9 个月消失，属于这个月龄的常见表现。",
+        "en": "An ATNR-like (fencing) posture was seen. It is most visible at 1–4 months and usually disappears by 3–9 months, so it is common at this age."
+      },
+      "explain": {
+        "zh": "ATNR 是一种原始反射：头转向一侧时，脸朝向的一侧手臂伸展、后脑一侧屈曲；通常在 3–9 个月消失。月龄更大时仍经常、持续地出现，是值得和医生说的情况。",
+        "en": "The ATNR is a primitive reflex: when the head turns, the arm on the face side extends and the other arm bends. It usually disappears by 3–9 months. Seeing it often and for long periods at an older age is worth mentioning to a doctor."
+      },
+      "followup": {
+        "zh": "多录几次不同时间的视频；如果宝宝 6 个月后仍经常保持这个姿势、或很难从这个姿势中自己动出来，请和医生聊聊。",
+        "en": "Record a few more videos at different times. If after 6 months your baby still often holds this posture, or has trouble moving out of it, talk to your doctor."
+      },
+      "sources": [
+        "S11"
+      ]
+    },
+    {
+      "id": "posture.frog_leg",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "posture",
+      "analysis": "posture",
+      "name": {
+        "zh": "蛙腿样姿势且腿部活动少",
+        "en": "Frog-leg posture with low leg activity"
+      },
+      "requires": {
+        "min_fps": 5,
+        "series": "smoothed",
+        "context": [
+          "supine"
+        ],
+        "joints": [
+          "leftHip",
+          "rightHip",
+          "leftKnee",
+          "rightKnee",
+          "leftAnkle",
+          "rightAnkle",
+          "leftShoulder",
+          "rightShoulder"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "min_thigh_abd": {
+          "value": 50,
+          "unit": "deg",
+          "origin": "engineering_prior"
+        },
+        "knee_lo": {
+          "value": 50,
+          "unit": "deg",
+          "origin": "engineering_prior"
+        },
+        "knee_hi": {
+          "value": 140,
+          "unit": "deg",
+          "origin": "engineering_prior"
+        },
+        "min_thigh_flat": {
+          "value": 0.8,
+          "unit": "ratio",
+          "origin": "engineering_prior",
+          "note": "projected thigh length vs session p90: thighs lying on the surface"
+        },
+        "min_knee_spread": {
+          "value": 2.2,
+          "unit": "x hip width",
+          "origin": "engineering_prior"
+        },
+        "min_observed_s": {
+          "value": 60,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "min_fraction": {
+          "value": 0.5,
+          "unit": "fraction",
+          "origin": "engineering_prior"
+        },
+        "max_leg_active_frac": {
+          "value": 0.35,
+          "unit": "fraction",
+          "origin": "engineering_prior"
+        }
+      },
+      "frame_predicate": {
+        "all": [
+          {
+            "f": "min_thigh_abd",
+            "op": ">=",
+            "v": "$min_thigh_abd"
+          },
+          {
+            "f": "min_knee_angle",
+            "op": ">=",
+            "v": "$knee_lo"
+          },
+          {
+            "f": "max_knee_angle",
+            "op": "<=",
+            "v": "$knee_hi"
+          },
+          {
+            "f": "min_thigh_flat",
+            "op": ">=",
+            "v": "$min_thigh_flat"
+          },
+          {
+            "f": "knee_spread",
+            "op": ">=",
+            "v": "$min_knee_spread"
+          }
+        ]
+      },
+      "episode": {
+        "min_duration_s": 5.0,
+        "merge_gap_s": 1.0
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "observed_s",
+            "op": ">=",
+            "v": "$min_observed_s"
+          },
+          {
+            "f": "fraction",
+            "op": ">=",
+            "v": "$min_fraction"
+          },
+          {
+            "f": "leg_active_frac",
+            "op": "<=",
+            "v": "$max_leg_active_frac"
+          }
+        ]
+      },
+      "longitudinal": {
+        "min_sessions": 3,
+        "min_span_days": 7,
+        "same_direction": false,
+        "severity": "discuss"
+      },
+      "severity": "note",
+      "message": {
+        "zh": "本次 {pct:.0f}% 的观察时间里双腿呈外展、屈膝、平贴床面的蛙腿样姿势，同时腿部活动较少（活动时间占 {leg_act:.0f}%）。",
+        "en": "Frog-leg-like leg posture for {pct:.0f}% of observed time with low leg activity ({leg_act:.0f}% active)."
+      },
+      "explain": {
+        "zh": "仰卧时的“蛙腿”姿势、或休息时四肢伸直平放，是临床上对肌张力偏低的初步印象之一。单次录像不能说明问题，困倦、包裹、衣物也会影响。",
+        "en": "A frog-leg position when lying on the back, or arms and legs lying straight and still at rest, is one of the first impressions clinicians use for low muscle tone. One recording proves nothing; sleepiness, swaddling and clothing also matter."
+      },
+      "followup": {
+        "zh": "在宝宝清醒、心情好的时候再录几次；如果总是这样且很少抬腿踢腿，可以带视频和医生讨论。",
+        "en": "Record again when your baby is awake and content. If the legs are always like this and your baby rarely lifts or kicks them, discuss the videos with your doctor."
+      },
+      "sources": [
+        "S13"
+      ]
+    },
+    {
+      "id": "posture.scissoring",
+      "version": "0.1",
+      "status": "research",
+      "family": "posture",
+      "analysis": "posture",
+      "name": {
+        "zh": "双腿伸直并交叉（剪刀样）",
+        "en": "Extended, crossed legs (scissoring-like)"
+      },
+      "requires": {
+        "min_fps": 5,
+        "series": "smoothed",
+        "context": [
+          "supine"
+        ],
+        "joints": [
+          "leftHip",
+          "rightHip",
+          "leftKnee",
+          "rightKnee",
+          "leftAnkle",
+          "rightAnkle"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "cross_thr": {
+          "value": -0.03,
+          "unit": "torso",
+          "origin": "engineering_prior"
+        },
+        "min_knee_angle": {
+          "value": 150,
+          "unit": "deg",
+          "origin": "engineering_prior"
+        },
+        "max_knee_spread": {
+          "value": 0.8,
+          "unit": "x hip width",
+          "origin": "engineering_prior"
+        },
+        "min_total_s": {
+          "value": 6.0,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "min_episodes": {
+          "value": 2,
+          "unit": "episodes",
+          "origin": "engineering_prior"
+        }
+      },
+      "frame_predicate": {
+        "all": [
+          {
+            "f": "ankle_cross",
+            "op": "<=",
+            "v": "$cross_thr"
+          },
+          {
+            "f": "min_knee_angle",
+            "op": ">=",
+            "v": "$min_knee_angle"
+          },
+          {
+            "f": "knee_spread",
+            "op": "<=",
+            "v": "$max_knee_spread"
+          }
+        ]
+      },
+      "episode": {
+        "min_duration_s": 2.0,
+        "merge_gap_s": 0.5
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "true_s",
+            "op": ">=",
+            "v": "$min_total_s"
+          },
+          {
+            "f": "n_episodes",
+            "op": ">=",
+            "v": "$min_episodes"
+          }
+        ]
+      },
+      "age_weeks": {
+        "min": 8,
+        "source": "S14"
+      },
+      "longitudinal": {
+        "min_sessions": 3,
+        "min_span_days": 7,
+        "same_direction": false,
+        "severity": "discuss"
+      },
+      "severity": "note",
+      "message": {
+        "zh": "本次有 {n} 段（共 {true_s:.0f} 秒）双腿伸直、并拢并交叉的姿势。",
+        "en": "{n} episodes ({true_s:.0f} s) of extended, adducted, crossed legs."
+      },
+      "explain": {
+        "zh": "官方资料描述的是“抱起时双腿变僵、交叉或呈剪刀样”。仰卧录像只是近似场景，所以这条规则还在研究阶段。",
+        "en": "Official guidance describes legs that stiffen and cross or scissor when the baby is picked up. A video of the baby lying on the back is only an approximation of that situation, so this check is still a research feature."
+      },
+      "sources": [
+        "S14"
+      ]
+    },
+    {
+      "id": "asym.arm_use",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "asymmetry",
+      "analysis": "activity",
+      "name": {
+        "zh": "一侧手臂明显动得少",
+        "en": "One arm moves much less"
+      },
+      "requires": {
+        "min_fps": 10,
+        "series": "smoothed",
+        "context": [
+          "supine"
+        ],
+        "joints": [
+          "leftShoulder",
+          "rightShoulder",
+          "leftWrist",
+          "rightWrist",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.7
+      },
+      "params": {
+        "min_abs_ai": {
+          "value": 0.33,
+          "unit": "index",
+          "origin": "engineering_prior",
+          "note": "(L-R)/(L+R) of path length; 0.33 = one side about twice the other"
+        },
+        "min_observed_s": {
+          "value": 60,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "max_conf_diff": {
+          "value": 0.1,
+          "unit": "confidence",
+          "origin": "engineering_prior",
+          "note": "guards against one side being occluded"
+        },
+        "min_active_s": {
+          "value": 20,
+          "unit": "s",
+          "origin": "engineering_prior"
+        }
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "arm_abs_asym_index",
+            "op": ">=",
+            "v": "$min_abs_ai"
+          },
+          {
+            "f": "arm_min_observed_s",
+            "op": ">=",
+            "v": "$min_observed_s"
+          },
+          {
+            "f": "arm_conf_diff",
+            "op": "<=",
+            "v": "$max_conf_diff"
+          },
+          {
+            "f": "arm_active_s",
+            "op": ">=",
+            "v": "$min_active_s"
+          }
+        ]
+      },
+      "age_weeks": {
+        "min": 15,
+        "source": "S15"
+      },
+      "longitudinal": {
+        "min_sessions": 3,
+        "min_span_days": 7,
+        "same_direction": true,
+        "severity": "discuss"
+      },
+      "severity": "note",
+      "message": {
+        "zh": "本次宝宝的{side_zh}手臂活动量明显少于另一侧（不对称指数 {ai:+.2f}）。",
+        "en": "The baby's {side_en} arm moved much less than the other (asymmetry index {ai:+.2f})."
+      },
+      "explain": {
+        "zh": "研究发现，后来发展为单侧脑瘫的婴儿，在自发动作和够物中常出现两侧不对称，约 15 周后更明显；12 个月前出现明显的单手偏好也被视为需要评估的信号。遮挡、侧卧、玩具只放一边都会造成假象。",
+        "en": "Studies found that infants who later develop one-sided cerebral palsy often move one side less in spontaneous movements and reaching, more clearly after about 15 weeks; a strong hand preference before 12 months is also a sign to have checked. Occlusion, lying on one side or toys placed on one side can all create this pattern."
+      },
+      "followup": {
+        "zh": "确认两侧都在画面里、光线相近，把玩具放在中间或换到另一侧再录；如果多次、跨天都是同一侧更少动，请和医生聊聊。",
+        "en": "Make sure both sides are in view with similar lighting, put toys in the middle or on the other side and record again. If several recordings on different days show the same side moving less, talk to your doctor."
+      },
+      "sources": [
+        "S15",
+        "S16",
+        "S17"
+      ]
+    },
+    {
+      "id": "milestone.hands_together_absent",
+      "version": "0.1",
+      "status": "enabled",
+      "family": "milestone",
+      "analysis": "posture",
+      "name": {
+        "zh": "未观察到双手在中线合拢",
+        "en": "Hands-together at midline not observed"
+      },
+      "requires": {
+        "min_fps": 5,
+        "series": "smoothed",
+        "context": [
+          "supine"
+        ],
+        "joints": [
+          "leftWrist",
+          "rightWrist",
+          "leftShoulder",
+          "rightShoulder",
+          "leftHip",
+          "rightHip"
+        ],
+        "min_coverage": 0.6
+      },
+      "params": {
+        "max_hands_dist": {
+          "value": 0.35,
+          "unit": "torso",
+          "origin": "engineering_prior"
+        },
+        "max_mid_u": {
+          "value": 0.35,
+          "unit": "torso",
+          "origin": "engineering_prior"
+        },
+        "min_observed_s": {
+          "value": 120,
+          "unit": "s",
+          "origin": "engineering_prior"
+        },
+        "max_true_s": {
+          "value": 0.5,
+          "unit": "s",
+          "origin": "engineering_prior"
+        }
+      },
+      "frame_predicate": {
+        "all": [
+          {
+            "f": "hands_dist",
+            "op": "<=",
+            "v": "$max_hands_dist"
+          },
+          {
+            "f": "hands_mid_u",
+            "op": "<=",
+            "v": "$max_mid_u"
+          }
+        ]
+      },
+      "episode": {
+        "min_duration_s": 0.5,
+        "merge_gap_s": 0.3
+      },
+      "session_predicate": {
+        "all": [
+          {
+            "f": "observed_s",
+            "op": ">=",
+            "v": "$min_observed_s"
+          },
+          {
+            "f": "true_s",
+            "op": "<=",
+            "v": "$max_true_s"
+          }
+        ]
+      },
+      "age_weeks": {
+        "min": 26,
+        "source": "S14"
+      },
+      "longitudinal": {
+        "min_sessions": 3,
+        "min_span_days": 7,
+        "same_direction": false,
+        "severity": "note"
+      },
+      "severity": "info",
+      "message": {
+        "zh": "本次 {obs:.0f} 秒的录像里没有看到双手在身体中线附近合拢。",
+        "en": "Hands were not seen together at the midline in {obs:.0f} s of video."
+      },
+      "explain": {
+        "zh": "6 个月以上仍很难把双手合在一起，是官方资料列出的需要留意的表现之一。一次没拍到很正常；只有多次都没看到才会提醒。",
+        "en": "Having a hard time bringing the hands together after 6 months is listed in official guidance as something to watch. Missing it in one video is normal; the app only highlights it after several recordings."
+      },
+      "sources": [
+        "S14"
+      ]
+    },
+    {
+      "id": "abstain.finger_fisting",
+      "version": "0.1",
+      "status": "abstain_always",
+      "family": "posture",
+      "analysis": "none",
+      "name": {
+        "zh": "握拳 / 手指姿势",
+        "en": "Fisting / finger postures"
+      },
+      "abstain_reason": {
+        "zh": "当前姿态模型（COCO-17）没有手指关键点，无法判断握拳或手指姿势，所以这条不做判断。",
+        "en": "COCO-17 has no finger keypoints."
+      },
+      "sources": [
+        "S14",
+        "S19"
+      ]
+    }
+  ]
+}

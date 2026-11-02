@@ -1,0 +1,72 @@
+{
+ "age_weeks": 2,
+ "context": "supine",
+ "fs": 15.000000000000053,
+ "rules": {
+  "abstain.finger_fisting": {
+   "severity": "info",
+   "status": "abstained"
+  },
+  "asym.arm_use": {
+   "severity": "note",
+   "status": "not_applicable"
+  },
+  "burst.spasm_like_cluster": {
+   "severity": "safety",
+   "status": "not_applicable"
+  },
+  "milestone.hands_together_absent": {
+   "severity": "info",
+   "status": "not_applicable"
+  },
+  "posture.atnr_like_persistent": {
+   "denominator_s": 10.666666666666629,
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 83.33333333333304,
+   "severity": "note",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "posture.frog_leg": {
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 83.66666666666637,
+   "severity": "note",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "posture.head_preference": {
+   "observed_s": 86.26666666666637,
+   "pref_index": 0.11462450592885376,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "posture.head_tilt": {
+   "median": 1.4117211411194148,
+   "observed_s": 69.26666666666642,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "posture.scissoring": {
+   "severity": "note",
+   "status": "not_applicable"
+  },
+  "rhythm.coarse": {
+   "severity": "discuss",
+   "status": "abstained"
+  },
+  "rhythm.fast_fine": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "rhythm.slow_bout": {
+   "severity": "info",
+   "status": "abstained"
+  },
+  "rhythm.slow_unilateral_sustained": {
+   "severity": "safety",
+   "status": "abstained"
+  }
+ }
+}

@@ -1,0 +1,92 @@
+{
+ "age_weeks": 30,
+ "context": "supine",
+ "fs": 30.000000000001705,
+ "rules": {
+  "abstain.finger_fisting": {
+   "severity": "info",
+   "status": "abstained"
+  },
+  "asym.arm_use": {
+   "arm_asym_index": 0.03785545021994528,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "burst.spasm_like_cluster": {
+   "largest_cluster": 0,
+   "severity": "safety",
+   "status": "not_detected",
+   "surrogate_p": 1.0
+  },
+  "milestone.hands_together_absent": {
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 89.96666666666155,
+   "severity": "info",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "posture.atnr_like_persistent": {
+   "denominator_s": 72.99999999999585,
+   "fraction": 0.7695442756576509,
+   "n_episodes": 2,
+   "observed_s": 89.96666666666155,
+   "severity": "note",
+   "status": "detected",
+   "true_s": 69.2333333333294
+  },
+  "posture.frog_leg": {
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 89.96666666666155,
+   "severity": "note",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "posture.head_preference": {
+   "direction": "L",
+   "observed_s": 89.96666666666155,
+   "pref_index": 0.9271781534460338,
+   "severity": "note",
+   "status": "detected"
+  },
+  "posture.head_tilt": {
+   "median": 0.6659605975119689,
+   "observed_s": 13.066666666665924,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "posture.scissoring": {
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 89.96666666666155,
+   "severity": "note",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "rhythm.coarse": {
+   "n_events": 0,
+   "severity": "discuss",
+   "status": "not_detected"
+  },
+  "rhythm.fast_fine": {
+   "n_events": 0,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "rhythm.slow_bout": {
+   "first_hz": 0.8265850830402581,
+   "first_limbs": [
+    "L_arm"
+   ],
+   "n_events": 5,
+   "severity": "info",
+   "status": "detected"
+  },
+  "rhythm.slow_unilateral_sustained": {
+   "n_events": 0,
+   "severity": "safety",
+   "status": "not_detected"
+  }
+ }
+}

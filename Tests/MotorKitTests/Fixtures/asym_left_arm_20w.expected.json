@@ -1,0 +1,88 @@
+{
+ "age_weeks": 20,
+ "context": "supine",
+ "fs": 30.000000000001705,
+ "rules": {
+  "abstain.finger_fisting": {
+   "severity": "info",
+   "status": "abstained"
+  },
+  "asym.arm_use": {
+   "arm_asym_index": -0.4851787510838179,
+   "direction": "L",
+   "severity": "note",
+   "status": "detected"
+  },
+  "burst.spasm_like_cluster": {
+   "largest_cluster": 0,
+   "severity": "safety",
+   "status": "not_detected",
+   "surrogate_p": 1.0
+  },
+  "milestone.hands_together_absent": {
+   "severity": "info",
+   "status": "not_applicable"
+  },
+  "posture.atnr_like_persistent": {
+   "denominator_s": 9.099999999999483,
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 89.96666666666155,
+   "severity": "note",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "posture.frog_leg": {
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 89.96666666666155,
+   "severity": "note",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "posture.head_preference": {
+   "observed_s": 89.96666666666155,
+   "pref_index": -0.4708994708994709,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "posture.head_tilt": {
+   "median": 0.06567012901641078,
+   "observed_s": 77.36666666666227,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "posture.scissoring": {
+   "fraction": 0.0,
+   "n_episodes": 0,
+   "observed_s": 89.96666666666155,
+   "severity": "note",
+   "status": "not_detected",
+   "true_s": 0.0
+  },
+  "rhythm.coarse": {
+   "n_events": 0,
+   "severity": "discuss",
+   "status": "not_detected"
+  },
+  "rhythm.fast_fine": {
+   "n_events": 0,
+   "severity": "note",
+   "status": "not_detected"
+  },
+  "rhythm.slow_bout": {
+   "first_hz": 0.9527935060310473,
+   "first_limbs": [
+    "R_arm"
+   ],
+   "n_events": 5,
+   "severity": "info",
+   "status": "detected"
+  },
+  "rhythm.slow_unilateral_sustained": {
+   "n_events": 0,
+   "severity": "safety",
+   "status": "not_detected"
+  }
+ }
+}

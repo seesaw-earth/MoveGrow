@@ -1,0 +1,59 @@
+{
+ "age_weeks": 12,
+ "context": "held",
+ "fs": 30.000000000001705,
+ "rules": {
+  "abstain.finger_fisting": {
+   "severity": "info",
+   "status": "abstained"
+  },
+  "asym.arm_use": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "burst.spasm_like_cluster": {
+   "severity": "safety",
+   "status": "abstained"
+  },
+  "milestone.hands_together_absent": {
+   "severity": "info",
+   "status": "abstained"
+  },
+  "posture.atnr_like_persistent": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "posture.frog_leg": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "posture.head_preference": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "posture.head_tilt": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "posture.scissoring": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "rhythm.coarse": {
+   "severity": "discuss",
+   "status": "abstained"
+  },
+  "rhythm.fast_fine": {
+   "severity": "note",
+   "status": "abstained"
+  },
+  "rhythm.slow_bout": {
+   "severity": "info",
+   "status": "abstained"
+  },
+  "rhythm.slow_unilateral_sustained": {
+   "severity": "safety",
+   "status": "abstained"
+  }
+ }
+}

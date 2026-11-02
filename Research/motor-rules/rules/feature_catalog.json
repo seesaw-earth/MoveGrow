@@ -1,0 +1,100 @@
+{
+  "_note": "Closed vocabulary: rules (hand-written or LLM-compiled) may only reference these names. Units: torso = mid-hip to mid-shoulder length; angles in degrees; L/R = the baby's anatomical left/right.",
+  "levels": {
+    "window": {
+      "analysis": ["spectral"],
+      "computed_on": "RAW keypoints (before One-Euro/low-pass), distal joints (wrists, ankles) in the body frame; fast band = 4-14 Hz band-pass, 2 s Hann windows, 0.5 s hop; slow band = 0.4-6 Hz, 4 s windows, 1 s hop",
+      "features": {
+        "peak_hz": {"unit": "Hz", "def": "frequency of the largest spectral peak in the band's search range (parabolic interpolation)"},
+        "prominence_db": {"unit": "dB", "def": "peak power over the median power of the reference band, excluding +-excl Hz around the peak"},
+        "rhythmicity": {"unit": "r", "def": "autocorrelation of the band-passed 2-D signal at a lag of one period of peak_hz"},
+        "amp_p2p": {"unit": "torso", "def": "peak-to-peak amplitude of the narrow-band component at the peak (2*sqrt(2*band variance))"},
+        "amp_p2p_cm": {"unit": "cm", "def": "amp_p2p times the torso_cm prior (approximate)"},
+        "contra_ratio": {"unit": "ratio", "def": "power of the homologous limb in the same window at the same frequency / this limb's peak-band power"},
+        "rigid_r2": {"unit": "R2", "def": "fraction of band-passed multi-joint image motion explained by one per-frame similarity transform (camera shake / whole-frame motion test)"},
+        "camera_rms": {"unit": "torso", "def": "RMS of the band-passed torso centroid in image space"},
+        "peak_frac": {"unit": "fraction", "def": "peak-band variance / reference-band variance"},
+        "valid_frac": {"unit": "fraction", "def": "fraction of frames in the window where the joint was detected"}
+      }
+    },
+    "frame": {
+      "analysis": ["posture", "posture_side", "posture_stat"],
+      "computed_on": "lightly smoothed keypoints (0.2 s moving average; in the app: One-Euro output) in the body frame; valid only for context 'supine' top-down views",
+      "features": {
+        "head_yaw_sin": {"unit": "sin(yaw)", "def": "(nose - ear midpoint).u / head radius; >0 face turned to the baby's left"},
+        "abs_head_yaw_sin": {"unit": "sin(yaw)", "def": "|head_yaw_sin|"},
+        "head_tilt_deg": {"unit": "deg", "def": "eye line vs shoulder line angle; >0 head tilted toward the baby's right shoulder; NaN when |yaw|>0.5"},
+        "elbow_angle_L": {"unit": "deg", "def": "interior angle shoulder-elbow-wrist (180 = straight), 2-D projection"},
+        "elbow_angle_R": {"unit": "deg", "def": "as elbow_angle_L"},
+        "knee_angle_L": {"unit": "deg", "def": "interior angle hip-knee-ankle (180 = straight)"},
+        "knee_angle_R": {"unit": "deg", "def": "as knee_angle_L"},
+        "thigh_abd_L": {"unit": "deg", "def": "angle of hip->knee vs the caudal torso axis, positive laterally"},
+        "thigh_abd_R": {"unit": "deg", "def": "as thigh_abd_L"},
+        "thigh_flat_L": {"unit": "ratio", "def": "projected thigh length / its session 90th percentile (~1 = thigh lying in the image plane)"},
+        "thigh_flat_R": {"unit": "ratio", "def": "as thigh_flat_L"},
+        "knee_spread": {"unit": "x hip width", "def": "(left knee u - right knee u) / hip width"},
+        "ankle_cross": {"unit": "torso", "def": "left ankle u - right ankle u (<0 = legs crossed)"},
+        "hands_dist": {"unit": "torso", "def": "wrist-to-wrist distance"},
+        "hands_mid_u": {"unit": "torso", "def": "max |u| of the two wrists (distance from body midline)"},
+        "face_side_elbow": {"unit": "deg", "def": "elbow angle on the side the face is turned to"},
+        "occiput_side_elbow": {"unit": "deg", "def": "elbow angle on the opposite side"},
+        "min_thigh_abd": {"unit": "deg", "def": "min of both sides (NaN if either missing)"},
+        "min_thigh_flat": {"unit": "ratio", "def": "min of both sides"},
+        "min_knee_angle": {"unit": "deg", "def": "min of both sides"},
+        "max_knee_angle": {"unit": "deg", "def": "max of both sides"}
+      }
+    },
+    "session": {
+      "posture": {
+        "observed_s": "seconds where every frame-predicate feature was valid",
+        "true_s": "seconds inside qualifying episodes",
+        "fraction": "true_s / observed_s",
+        "n_episodes": "count of qualifying episodes",
+        "longest_s": "longest episode",
+        "denominator_s": "seconds where denominator_predicate holds (if given)",
+        "frac_of_denominator": "true_s / denominator_s",
+        "leg_active_frac": "mean active fraction of both legs (hysteresis on distal speed, noise-adaptive)",
+        "arm_active_frac": "mean active fraction of both arms"
+      },
+      "posture_side": {
+        "observed_s": "seconds with a valid side signal",
+        "left_s": "seconds with signal >= thr",
+        "right_s": "seconds with signal <= -thr",
+        "turned_frac": "(left_s + right_s) / observed_s",
+        "pref_index": "(left_s - right_s) / (left_s + right_s)"
+      },
+      "posture_stat": {
+        "observed_s": "seconds with a valid signal",
+        "median": "median of the signal",
+        "iqr": "inter-quartile range"
+      },
+      "activity": {
+        "arm_asym_index": "(L - R)/(L + R) of distal path length per observed minute",
+        "arm_abs_asym_index": "|arm_asym_index|",
+        "arm_conf_diff": "|mean keypoint confidence L - R| (occlusion guard)",
+        "arm_min_observed_s": "min observed seconds of the two arms",
+        "arm_active_s": "active seconds summed over both arms",
+        "leg_asym_index": "as arm_*", "leg_abs_asym_index": "as arm_*", "leg_conf_diff": "as arm_*",
+        "leg_min_observed_s": "as arm_*", "leg_active_s": "as arm_*"
+      },
+      "burst": {
+        "largest_cluster": "events in the largest cluster whose median interval <= max_median_interval_s",
+        "n_sudden": "events that were sudden (quiet before), bilateral and axial",
+        "n_events": "all near-synchronous multi-limb speed bursts",
+        "cluster_median_interval_s": "median onset interval in that cluster",
+        "cluster_interval_cv": "coefficient of variation of the intervals",
+        "surrogate_p": "share of limb-wise circular-shift surrogates with a cluster at least as large",
+        "speed_threshold": "speed threshold used (torso/s)"
+      }
+    }
+  },
+  "message_placeholders": {
+    "spectral": ["t0", "t1", "dur", "hz", "p2p_cm", "limbs_zh", "limbs_en", "laterality_zh", "laterality_en", "n", "total_s"],
+    "posture": ["pct", "n", "obs", "true_s", "leg_act"],
+    "posture_side": ["pct", "side_zh", "side_en", "pi", "obs"],
+    "posture_stat": ["median", "side_zh", "side_en", "obs"],
+    "activity": ["side_zh", "side_en", "ai"],
+    "burst": ["n", "dur", "iv"]
+  },
+  "not_observable_with_coco17": ["finger postures", "fisting", "thumb adduction", "facial expression", "eye deviation", "trunk arching in a top-down view (out of plane)"]
+}

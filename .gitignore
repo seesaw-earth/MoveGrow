@@ -7,3 +7,5 @@ xcuserdata/
 .model-cache/
 *.mlpackage
 *.mlmodelc
+Research/motor-rules/out/
+__pycache__/
