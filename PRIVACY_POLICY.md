@@ -1,41 +1,49 @@
 # MoveGrow Privacy Policy
 
-**Effective date: September 29, 2026**
+**Updated November 3, 2026**
 
-MoveGrow: Baby Milestones is designed to process baby movement videos privately on the user's iPhone.
+This is the source text of the policy published at https://seesaw-earth.github.io/MoveGrow/privacy.html (also in Chinese and Spanish; the English version prevails).
 
-## Data processing
+MoveGrow: Baby Milestones is designed to process your baby's movement videos privately on your iPhone.
 
-MoveGrow does not require an account. Baby profile information, imported or recorded videos, pose keypoints, movement summaries, and saved milestone moments are processed and stored locally on the device in the app's protected storage.
+## What MoveGrow keeps, and where
 
-MoveGrow does not operate an application backend for uploading these materials and does not automatically transmit baby videos, pose data, movement summaries, or milestone records to MoveGrow servers.
+MoveGrow doesn't require an account. The baby profile, recorded or imported videos, pose keypoints, movement summaries, observations and saved milestones are processed and stored on your device, in the app's protected storage.
+
+MoveGrow has no application server for these materials. It doesn't transmit baby videos, pose data, movement summaries, observations or milestones to MoveGrow or to anyone else.
 
 ## Camera and Photos
 
-Camera access is used only when the user chooses to record a video. The system Photos picker is used when the user chooses a video from their photo library. A private local copy of a selected video is created for on-device analysis; the original Photos item is not modified.
+The camera is used only when you choose to record. The system Photos picker is used when you choose videos from your library; MoveGrow makes a private local copy for analysis and never changes the original.
+
+If you tap Save to Photos after exporting a video or a chart image, MoveGrow asks for add-only access. That lets it add the file you exported, not read your library.
 
 ## Sharing and export
 
-MoveGrow exports or shares content only after an explicit user action using iOS sharing features.
+MoveGrow exports or shares content only when you ask, using the iOS share sheet. Exported videos and images are created on your device.
 
-## Analytics, advertising, and tracking
+## Analytics, advertising and tracking
 
-MoveGrow does not include advertising, cross-app tracking, or a MoveGrow analytics service in version 1.0.
+MoveGrow has no advertising, no analytics service and no cross-app tracking. This website uses no cookies and no analytics, and loads nothing from other sites.
 
 ## Local storage
 
-App data is excluded from automatic backup. Deleting MoveGrow or losing the device may remove locally stored memories. Users should export content they want to retain.
+App data is excluded from automatic backup. Deleting the app or losing the device can remove your memories, so export what you want to keep.
 
-## Developmental and medical information
+## Health information
 
-MoveGrow provides descriptive movement visualization and organization. It is not a developmental screening test, medical diagnosis, treatment recommendation, or medical device. Users should contact an appropriate healthcare professional with developmental or medical concerns.
+MoveGrow describes movement and organizes your videos. It isn't a developmental screening test, a diagnosis, a treatment recommendation or a medical device. Contact a healthcare professional about any developmental or medical concern.
 
-## Open source components
+## Who MoveGrow is for
 
-MoveGrow uses open-source components, including UltralyticsYOLO, under the GNU Affero General Public License v3.0. Source code and notices are published at https://github.com/seesaw-earth/MoveGrow .
+MoveGrow is intended for adult parents and caregivers.
 
-## Support and privacy questions
+## Open source
 
-For support or privacy questions, use https://seesaw-earth.github.io/MoveGrow/support.html . Do not post private health information, baby videos, or other sensitive personal information in a public GitHub issue.
+MoveGrow is open-source software under the GNU Affero General Public License v3.0. The source code and third-party notices are in the public repository: https://github.com/seesaw-earth/MoveGrow
 
-The developer and App Store seller is **Ziqing Shi**.
+## Questions
+
+For privacy questions, email ziqing.shi@icloud.com or use the public issue tracker at https://github.com/seesaw-earth/MoveGrow/issues. Please don't post baby videos or health information in a public issue.
+
+Developer and App Store seller: **Ziqing Shi**.

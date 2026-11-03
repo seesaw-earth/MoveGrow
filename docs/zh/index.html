@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>MoveGrow：宝宝动作的私密日记</title>
+  <meta name="description" content="拍下宝宝的动作，MoveGrow 就在你的 iPhone 上追踪手臂、腿和头部，并展示几周来动作的变化。无需账户，不上传，开源。">
+  <link rel="canonical" href="https://seesaw-earth.github.io/MoveGrow/zh/">
+  <link rel="alternate" hreflang="en" href="https://seesaw-earth.github.io/MoveGrow/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://seesaw-earth.github.io/MoveGrow/zh/">
+  <link rel="alternate" hreflang="es" href="https://seesaw-earth.github.io/MoveGrow/es/">
+  <link rel="alternate" hreflang="x-default" href="https://seesaw-earth.github.io/MoveGrow/">
+  <meta name="theme-color" content="#F6F8F2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111A10" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icon-32.png">
+  <link rel="apple-touch-icon" href="../assets/icon-180.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MoveGrow">
+  <meta property="og:title" content="MoveGrow：宝宝动作的私密日记">
+  <meta property="og:description" content="拍下宝宝的动作，MoveGrow 就在你的 iPhone 上追踪手臂、腿和头部，并展示几周来动作的变化。无需账户，不上传，开源。">
+  <meta property="og:url" content="https://seesaw-earth.github.io/MoveGrow/zh/">
+  <meta property="og:image" content="https://seesaw-earth.github.io/MoveGrow/assets/og-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="MoveGrow 的 App 图标，旁边是宝宝的动作骨架以及手臂和腿的速度图。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../assets/site.css?v=20261103">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<div class="lang-hint" id="lang-hint" hidden><div class="wrap"><span data-offer="en" lang="en" hidden>This page is also in English. <a href="../" hreflang="en">Read in English</a><button type="button">Dismiss</button></span><span data-offer="es" lang="es" hidden>Esta página también está en español. <a href="../es/" hreflang="es">Ver en español</a><button type="button">Cerrar</button></span></div></div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="../assets/icon-180.png" alt="" width="36" height="36">MoveGrow</a>
+    <nav class="site-nav" aria-label="MoveGrow">
+      <a class="section-link" href="#how">使用方式</a>
+      <a class="section-link" href="privacy.html">隐私</a>
+      <a class="section-link" href="support.html">支持</a>
+      <a class="section-link" href="https://github.com/seesaw-earth/MoveGrow">源代码</a>
+      <span class="langs" role="group" aria-label="语言"><a href="../" hreflang="en" lang="en">English</a><a href="../zh/" hreflang="zh-Hans" lang="zh-Hans" aria-current="true">中文</a><a href="../es/" hreflang="es" lang="es">Español</a></span>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1>看见每个动作，<br>也看见成长。</h1>
+        <p class="lead">MoveGrow 是一本私密的宝宝动作日记，就在你的 iPhone 上。拍一两分钟视频，App 会在手机上直接追踪宝宝的手臂、腿和头部，再展示几周来动作的变化。</p>
+        <div class="actions">
+          <!-- When MoveGrow is on the App Store, put the Download on the App Store badge first here. -->
+          <a class="button primary" href="#how">了解使用方式</a>
+          <a class="button" href="https://github.com/seesaw-earth/MoveGrow">查看源代码</a>
+        </div>
+        <p class="small">适用于 iOS 17 或更高版本的 iPhone。免费、开源、无需账户。支持 English、简体中文和 Español。</p>
+      </div>
+      <figure class="specimen">
+        <div class="panel">
+          <div class="readout" aria-hidden="true"><span class="time" id="hero-time">0:10</span><span class="pills"><span class="pill" data-limb="L_arm">左臂</span><span class="pill" data-limb="R_arm">右臂</span><span class="pill" data-limb="L_leg">左腿</span><span class="pill" data-limb="R_leg">右腿</span></span></div>
+          <canvas id="hero-canvas" role="img" aria-label="动画：一个模拟宝宝的骨架在蹬腿，下方是手臂和腿的速度曲线。" data-arms="手臂" data-legs="腿"></canvas>
+        </div>
+        <figcaption>这不是真实的宝宝：画面来自 MoveGrow 测试数据中一段模拟的蹬腿动作，按 App 的方式绘制。下方是每只手臂和每条腿的速度；实线表示左侧，虚线表示右侧。</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="how" class="how">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>从一段视频，到一幅动作的画面</h2>
+        <p class="lead">三个步骤，全部在你的手机上完成。</p>
+      </div>
+      <ol class="steps">
+        <li><h3>拍摄或选择视频</h3><p>让宝宝仰躺，从上方拍一两分钟。也可以从“照片”中一次选择最多 10 个视频，总时长不超过 20 分钟。</p></li>
+        <li><h3>在 iPhone 上完成追踪</h3><p>姿态模型按视频的原始帧率，在每一帧中找出身体的关键点。不会上传任何内容；分析时你也可以继续使用 App。</p></li>
+        <li><h3>看见动作，也看见变化</h3><p>回放时显示骨架，在同一条时间线上查看每个肢体，再看活动量、速度和左右平衡在几天、几周里的变化。</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="tint">
+    <div class="wrap">
+      <div class="section-head"><h2>MoveGrow 能让你看到什么</h2></div>
+      <div class="features">
+        <div><h3>画在你自己视频上的骨架</h3><p>播放时，手臂、腿和头部的骨架会叠加在视频上，测量了什么一目了然。</p></div>
+        <div><h3>一条时间线，看全部动作</h3><p>手臂和腿的速度、肘和膝的角度、左右平衡和头部朝向共用一条时间轴。轻点任意位置，视频就会跳到那里。</p></div>
+        <div><h3>按天、按周看成长</h3><p>活动量、速度、左右平衡、关节活动范围和转头，可以按日期或按宝宝的年龄查看；填写预产期后会使用矫正年龄。</p></div>
+        <div><h3>有背景说明的观察</h3><p>临床文献中描述过的模式，例如新生儿的细微抖动，或明显偏向一侧转头，都会附上为什么提到它，以及你可以做什么。它们只是描述，不是诊断。</p></div>
+        <div><h3>贴合现实的日期</h3><p>MoveGrow 会从视频中读取拍摄日期。如果没有，你可以选择具体日期、宝宝出生后的天数，或者只填“大约六周大”。</p></div>
+        <div><h3>只分享你选择的内容</h3><p>可以导出带骨架和图表的视频，也可以把成长图表导出成一张图片，带去体检时给医生看。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="night" id="privacy">
+    <div class="wrap">
+      <div class="section-head"><h2>宝宝的视频只留在你的手机里</h2></div>
+      <ul class="facts">
+        <li><strong>无需账户</strong>不用注册，也不用登录。</li>
+        <li><strong>不会上传</strong>视频、追踪和分析结果都在你的 iPhone 上生成和保存。MoveGrow 没有可以接收它们的服务器。</li>
+        <li><strong>没有广告和追踪</strong>App 没有广告、数据分析或跨 App 追踪。这个网站也不使用 Cookie。</li>
+        <li><strong>不进入自动备份</strong>App 数据不会被自动备份，所以换手机前，请先导出想保留的视频。</li>
+      </ul>
+      <p class="more"><a href="privacy.html">阅读隐私政策</a></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <h2>谨慎对待健康问题</h2>
+      <div>
+        <p>MoveGrow 描述的是家庭视频中能看到的动作。它不给发育打分，不筛查疾病，也不能代替体检。拍摄角度、光线、衣服以及宝宝是否犯困，都会影响它看到的内容。</p>
+        <p>当某个情况值得多留意时，App 会清楚地告诉你，并建议可以试试什么，或者什么时候该和医生谈谈。看医生时请带上视频，它能呈现文字说不清的东西。</p>
+        <div class="callout"><p>如果宝宝看起来不舒服，或者情况看起来很紧急，请立即联系医生或拨打当地急救电话，不要等 App 提醒。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tint">
+    <div class="wrap split">
+      <h2>从模型到图表，全部开源</h2>
+      <div>
+        <p>MoveGrow 是自由软件，采用 GNU Affero 通用公共许可证第 3 版。它使用在 iPhone 上运行的 Ultralytics YOLO26 姿态模型。每条观察背后的规则都是公开的数据，并注明了出处，任何人都可以查看。</p>
+        <p class="actions"><a class="button" href="https://github.com/seesaw-earth/MoveGrow">在 GitHub 上查看 MoveGrow</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq">
+    <div class="wrap">
+      <h2>常见问题</h2>
+      <details><summary>MoveGrow 会上传我的视频吗？</summary><p>不会。录制、追踪、图表和导出都在你的 iPhone 上完成。只有你自己分享或保存时，视频才会离开手机。</p></details>
+      <details><summary>应该怎么拍？</summary><p>让宝宝仰躺在纯色的毯子上，从上方拍摄，拍到全身，光线均匀，拍一到三分钟。画面里不要有其他人。录制时 App 会给你提示。</p></details>
+      <details><summary>支持哪些 iPhone？</summary><p>运行 iOS 17 或更高版本的 iPhone。较新的机型分析更快。分析时你可以继续使用 App；在 iOS 26 上，它还会在后台继续进行。</p></details>
+      <details><summary>宝宝是早产的，有影响吗？</summary><p>如果宝宝提前两周或以上出生，请在宝宝资料里填写预产期。24 个月前，图表和检查会使用矫正年龄，与儿科的做法一致。</p></details>
+      <details><summary>MoveGrow 是医疗器械吗？</summary><p>不是。它是描述动作的私人视频日记，不是筛查测试，也不是诊断。如有任何担心，请咨询儿科医生。</p></details>
+      <details><summary>换手机时怎么保留视频？</summary><p>为了保护隐私，MoveGrow 的数据不会进入自动备份。换手机前，请把想保留的视频导出到“照片”或“文件”，可以是原始视频，也可以是带骨架和图表的 MP4。</p></details>
+      <details><summary>支持哪些语言？</summary><p>English、简体中文和 Español。可以随时在 App 的“设置”中切换。</p></details>
+      <details><summary>需要付费吗？</summary><p>MoveGrow 免费、开源，没有广告，也没有 App 内购买。</p></details>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <nav aria-label="MoveGrow">
+      <a href="privacy.html">隐私政策</a>
+      <a href="support.html">支持</a>
+      <a href="https://github.com/seesaw-earth/MoveGrow">源代码</a>
+      <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/LICENSE">许可证（AGPL-3.0）</a>
+    </nav>
+    <p class="legal">© 2026 Ziqing Shi. 这个网站不使用 Cookie，也没有数据分析。</p>
+  </div>
+</footer>
+<script src="../assets/site.js?v=20261103"></script>
+<script src="../assets/motion.js?v=20261103"></script>
+<script src="../assets/hero.js?v=20261103"></script>
+</body>
+</html>
