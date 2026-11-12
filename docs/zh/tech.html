@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>MoveGrow 如何测量动作 — MoveGrow</title>
+  <meta name="description" content="MoveGrow 背后的方法：在 iPhone 上运行的三维人体模型，由它计算出的各项指标，这些指标的依据，以及它们在哪里不再可靠。">
+  <link rel="canonical" href="https://seesaw-earth.github.io/MoveGrow/zh/tech.html">
+  <link rel="alternate" hreflang="en" href="https://seesaw-earth.github.io/MoveGrow/tech.html">
+  <link rel="alternate" hreflang="zh-Hans" href="https://seesaw-earth.github.io/MoveGrow/zh/tech.html">
+  <link rel="alternate" hreflang="es" href="https://seesaw-earth.github.io/MoveGrow/es/tech.html">
+  <link rel="alternate" hreflang="x-default" href="https://seesaw-earth.github.io/MoveGrow/tech.html">
+  <meta name="theme-color" content="#F6F8F2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111A10" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icon-32.png">
+  <link rel="apple-touch-icon" href="../assets/icon-180.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MoveGrow">
+  <meta property="og:title" content="MoveGrow 如何测量动作 — MoveGrow">
+  <meta property="og:description" content="MoveGrow 背后的方法：在 iPhone 上运行的三维人体模型，由它计算出的各项指标，这些指标的依据，以及它们在哪里不再可靠。">
+  <meta property="og:url" content="https://seesaw-earth.github.io/MoveGrow/zh/tech.html">
+  <meta property="og:image" content="https://seesaw-earth.github.io/MoveGrow/assets/og-zh.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="MoveGrow 的 App 图标，旁边是宝宝的动作骨架以及手臂和腿的速度图。">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale:alternate" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../assets/site.css?v=20261112">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<div class="lang-hint" id="lang-hint" hidden><div class="wrap"><span data-offer="en" lang="en" hidden>This page is also in English. <a href="../tech.html" hreflang="en">Read in English</a><button type="button">Dismiss</button></span><span data-offer="es" lang="es" hidden>Esta página también está en español. <a href="../es/tech.html" hreflang="es">Ver en español</a><button type="button">Cerrar</button></span></div></div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="../assets/icon-180.png" alt="" width="36" height="36">MoveGrow</a>
+    <nav class="site-nav" aria-label="MoveGrow">
+      <a class="section-link" href="./#how">使用方式</a>
+      <a class="section-link" href="tech.html" aria-current="page">技术</a>
+      <a class="section-link" href="privacy.html">隐私</a>
+      <a class="section-link" href="support.html">支持</a>
+      <a class="section-link" href="https://github.com/seesaw-earth/MoveGrow">源代码</a>
+      <span class="langs" role="group" aria-label="语言"><a href="../tech.html" hreflang="en" lang="en">English</a><a href="../zh/tech.html" hreflang="zh-Hans" lang="zh-Hans" aria-current="true">中文</a><a href="../es/tech.html" hreflang="es" lang="es">Español</a></span>
+    </nav>
+  </div>
+</header>
+<main id="main" class="tech">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1>MoveGrow<br>如何测量动作</h1>
+        <p class="lead">MoveGrow 在 iPhone 上把一段宝宝的家庭视频变成身体的三维轨迹，再用一小组有据可查的指标来描述它。这个页面说明每一步怎么做、数字代表什么，以及它们在哪里不再可靠。</p>
+        <div class="actions"><a class="button primary" href="https://github.com/seesaw-earth/MoveGrow">源代码</a><a class="button" href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/rules.json">规则库</a><a class="button" href="https://github.com/seesaw-earth/MoveGrow/blob/main/INSTANTHMR.md">模型说明</a><a class="button" href="#cite">如何引用</a></div>
+        <p class="small byline">作者：Ziqing Shi。本页描述的是使用 InstantHMR 姿态引擎的 MoveGrow。<br>更新于 2026 年 11 月 12 日</p>
+      </div>
+      <figure class="specimen">
+        <div class="panel frame-panel">
+          <svg viewBox="0 0 360 450" role="img" aria-label="示意图：一个仰卧的宝宝，从上方看；躯干中心画着三个箭头，躯干旁边有一把标尺。">
+            <circle class="bf-head" cx="180" cy="92" r="36"/>
+            <circle class="bf-eye" cx="167" cy="88" r="3.5"/><circle class="bf-eye" cx="193" cy="88" r="3.5"/>
+            <path class="bf-bone" d="M180 128V258M136 152H224M154 258H206M136 152L96 122L112 76M224 152L270 178L292 226M154 258L112 312L146 366M206 258L252 304L228 362"/>
+            <g class="bf-joint"><circle cx="136" cy="152" r="5"/><circle cx="224" cy="152" r="5"/><circle cx="96" cy="122" r="5"/><circle cx="270" cy="178" r="5"/><circle cx="154" cy="258" r="5"/><circle cx="206" cy="258" r="5"/><circle cx="112" cy="312" r="5"/><circle cx="252" cy="304" r="5"/><circle cx="112" cy="76" r="7.5"/><circle cx="292" cy="226" r="7.5"/><circle cx="146" cy="366" r="7.5"/><circle cx="228" cy="362" r="7.5"/></g>
+            <path class="bf-rule" d="M104 152V258M94 152H114M94 258H114"/>
+            <text class="bf-label bf-one" x="80" y="213" text-anchor="middle">1</text>
+            <path class="bf-axis" d="M180 205V166M180 205H240"/>
+            <path class="bf-tip" d="M180 150L171 168H189ZM256 205L238 196V214Z"/>
+            <circle class="bf-axis bf-w" cx="180" cy="205" r="11"/><circle class="bf-tip" cx="180" cy="205" r="4"/>
+            <text class="bf-label" x="196" y="182">v</text>
+            <text class="bf-label" x="246" y="232">u</text>
+            <text class="bf-label" x="150" y="234">w</text>
+          </svg>
+        </div>
+        <figcaption>体坐标系示意图。所有指标都在宝宝自己的坐标系里计算：<b>u</b> 指向宝宝的左侧，<b>v</b> 指向头部，<b>w</b> 垂直于胸口向外。长度以躯干长度为单位（<b>1</b>：从两髋中点到两肩中点），所以摄像头的远近和宝宝的身材大小都不会改变数值。</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="tint">
+    <div class="wrap split">
+      <h2>概览</h2>
+      <div>
+        <p>家长拍一两分钟宝宝的视频。对每一个被分析的帧，MoveGrow 先找到宝宝，再用 InstantHMR <a class="cite" href="#ref-1">[1]</a> 和 MHR 人体模型 <a class="cite" href="#ref-2">[2]</a> 估计 70 个身体关键点的三维位置，并换算到宝宝自己的体坐标系里。根据这条轨迹，它计算每个肢体动了多少、动得多快，关节弯曲到什么程度，头朝向哪里，以及四肢之间如何配合。</p>
+        <p>另有一套规则库，把这条轨迹和已发表的临床与发育文献中描述的动作模式作比较；无法判断时会明确说明。每条规则都列出出处，并标明每个阈值是来自文献，还是工程上的起始值。</p>
+        <p>所有计算都在 iPhone 上完成。MoveGrow 只描述动作，不给发育打分，不筛查疾病，也不做诊断。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="wrap pipeline">
+      <div class="pipeline-head">
+        <h2>从一帧画面到一个测量值</h2>
+        <p class="lead">五个步骤，对每一个被分析的帧重复一遍。</p>
+      </div>
+      <ol class="stages">
+        <li><h3>找到宝宝</h3><p>YOLO26l-pose <a class="cite" href="#ref-4">[4]</a> 查看画面，返回其中最大的那个人。它给出的方框告诉下一步该看哪里。它自己的二维关键点会保留下来用于对照，但不参与分析。</p></li>
+        <li><h3>估计三维身体</h3><p>InstantHMR 读取这个方框的两张裁剪图（一张较宽，一张较近），预测 MHR 人体模型的姿态和体型，以及带不确定度的二维关键点。网络在 iPhone 的神经网络引擎上运行。</p></li>
+        <li><h3>让姿态贴合画面</h3><p>用一步 Levenberg–Marquardt 迭代调整预测的姿态，使投影后的身体落在网络自己给出的二维关键点上，每个关键点按置信度加权。这一步没有任何学习得到的参数。</p></li>
+        <li><h3>得到 70 个关键点</h3><p>MHR 人体模型把拟合后的参数转换成相机坐标系里的 70 个关键点。MoveGrow 只分析身体关节；手指上的点只用于绘制和导出，从不参与分析。</p></li>
+        <li><h3>在宝宝的坐标系里测量</h3><p>把关键点旋转到体坐标系，并除以躯干长度。下面的各项指标和规则库都基于这条轨迹。</p></li>
+      </ol>
+      <ul class="notes">
+        <li>第一遍以每秒 15 帧分析，几秒内就能给出结果。第二遍补齐到所选的帧率（每秒 15、30 或 60 帧，默认 30），中断后可以接着进行。</li>
+        <li>App 不从视频里读取手机的焦距，而是假定它等于画面对角线的 1.05 倍；InstantHMR 在焦距未知时也是这样处理的。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="tint" id="measures">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>测量哪些指标</h2>
+        <p class="lead">全部来自三维轨迹，在体坐标系里计算。回放时间线、摘要和成长图表用的是同一组数字。</p>
+      </div>
+      <div class="table-wrap"><table class="data stack">
+          <thead><tr><th scope="col">指标</th><th scope="col">计算方法</th><th scope="col">单位</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">肢体速度</th><td data-label="计算方法">每只手腕和每只脚踝的速度，按 0.1 秒平滑</td><td data-label="单位">躯干长度/秒</td></tr>
+            <tr><th scope="row">活动量</th><td data-label="计算方法">肢体处于运动状态的时间占比：速度超过每秒 0.18 个躯干长度时算开始，低于 0.10 时算停止；躯干关键点本身抖动较大时，这两个门槛会相应提高</td><td data-label="单位">时间占比（%）</td></tr>
+            <tr><th scope="row">肘、膝、髋的角度</th><td data-label="计算方法">肩–肘–腕、髋–膝–踝、肩–髋–膝的三维夹角。活动范围取第 5 到第 95 百分位</td><td data-label="单位">度（180 = 伸直）</td></tr>
+            <tr><th scope="row">头部朝向</th><td data-label="计算方法">鼻子相对两耳中点的方向，在横贯躯干的平面内计算。偏向一侧超过约 15° 记为转头</td><td data-label="单位">朝左、居中、朝右的时间占比</td></tr>
+            <tr><th scope="row">左右平衡</th><td data-label="计算方法">(左 − 右) ÷ (左 + 右)，用的是每个肢体每分钟移动的路程，手臂和腿分别计算</td><td data-label="单位">−1 到 +1（0 = 两侧相等）</td></tr>
+            <tr><th scope="row">抬起高度</th><td data-label="计算方法">每只手和每只脚在躯干前方的距离（沿 w 方向）。仰卧时，就是朝向摄像头的方向。摘要取第 90 百分位</td><td data-label="单位">躯干长度</td></tr>
+            <tr><th scope="row">双手合拢</th><td data-label="计算方法">两只手腕之间的距离，以及这个距离小于 0.3 个躯干长度的时间占比</td><td data-label="单位">躯干长度；时间占比（%）</td></tr>
+            <tr><th scope="row">腿部模式</th><td data-label="计算方法">腿在活动时，左右膝屈伸之间的相关性，取约 2 秒的窗口</td><td data-label="单位">−1（交替）到 +1（同时）</td></tr>
+            <tr><th scope="row">同步性</th><td data-label="计算方法">四个肢体的速度两两之间的平均相关性，取约 2 秒的窗口</td><td data-label="单位">−1 到 +1</td></tr>
+            <tr><th scope="row">整体运动</th><td data-label="计算方法">四个肢体速度的平均值</td><td data-label="单位">躯干长度/秒</td></tr>
+            <tr><th scope="row">追踪占比</th><td data-label="计算方法">被分析的帧里找到躯干的比例</td><td data-label="单位">帧占比（%）</td></tr>
+          </tbody>
+        </table></div>
+    </div>
+  </section>
+
+  <section id="engines">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>两个姿态引擎</h2>
+        <p class="lead">默认使用 InstantHMR。YOLO26l-pose 负责在每一帧里为它找到宝宝；也可以在“设置”里选它作为引擎；当构建版本里没有三维模型时，由它接替。</p>
+      </div>
+      <div class="table-wrap"><table class="data stack all">
+          <thead><tr><th scope="col"></th><th scope="col">InstantHMR（三维）</th><th scope="col">YOLO26l-pose（二维）</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">关键点</th><td data-label="InstantHMR（三维）">70 个三维点，每个都带二维位置和不确定度</td><td data-label="YOLO26l-pose（二维）">17 个二维点</td></tr>
+            <tr><th scope="row">关节角度</th><td data-label="InstantHMR（三维）">三维空间里的夹角</td><td data-label="YOLO26l-pose（二维）">画面上看到的夹角</td></tr>
+            <tr><th scope="row">朝向摄像头的运动</th><td data-label="InstantHMR（三维）">可以测量</td><td data-label="YOLO26l-pose（二维）">只表现为肢体看起来变短</td></tr>
+            <tr><th scope="row">抬起高度、腿部模式、同步性</th><td data-label="InstantHMR（三维）">有</td><td data-label="YOLO26l-pose（二维）">没有</td></tr>
+            <tr><th scope="row">轨迹平滑</th><td data-label="InstantHMR（三维）">不做</td><td data-label="YOLO26l-pose（二维）">One-Euro 滤波</td></tr>
+          </tbody>
+        </table></div>
+    </div>
+  </section>
+
+  <section class="night" id="accuracy">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>准确度，以及目前还不知道的事</h2>
+        <p>InstantHMR 的作者在两个公开基准上报告了它的准确度，这两个基准拍的都是在日常场景中活动的成年人 <a class="cite" href="#ref-1">[1]</a>。指标是 PA-MPJPE：把预测姿态和真实姿态对齐之后，各关节之间的平均距离，单位是毫米，越小越好。</p>
+      </div>
+      <div class="table-wrap"><table class="data">
+          <thead><tr><th scope="col">InstantHMR medium</th><th scope="col">EMDB-1</th><th scope="col">3DPW</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">仅网络</th><td data-label="EMDB-1">48.8 mm</td><td data-label="3DPW">40.0 mm</td></tr>
+            <tr><th scope="row">加上两张裁剪图的拟合</th><td data-label="EMDB-1">44.4 mm</td><td data-label="3DPW">39.3 mm</td></tr>
+          </tbody>
+        </table></div>
+      <p class="after">MoveGrow 还没有测量过它在婴儿身上的准确度。看 App 里的数字时，请记住下面这些局限。</p>
+      <ul class="facts">
+        <li><strong>面向一般人群</strong>姿态模型几乎都是用成年人的数据训练的，然后原样用在婴儿身上 <a class="cite" href="#ref-5">[5]</a> <a class="cite" href="#ref-6">[6]</a>。婴儿的身体比例不同。三维重建婴儿和儿童身体的研究指出，为成年人设计的方法在他们身上泛化得不好 <a class="cite" href="#ref-8">[8]</a>，因此改用专门的婴儿人体模型 <a class="cite" href="#ref-7">[7]</a>。</li>
+        <li><strong>只有一个摄像头</strong>深度是模型的估计，不是测量值，也是最不确定的方向。焦距是假定的，绝对距离可能有偏差，所以各项指标都以躯干长度为单位。</li>
+        <li><strong>摄像头能看到什么</strong>宽松的衣服、襁褓和毯子、画面里照护者的手，以及移动的摄像头，都会改变轨迹。</li>
+        <li><strong>帧率</strong>每秒 30 帧时，看不到快于每秒约 15 次的节律。规则库要求至少每秒 24 帧，才会对节律作判断。</li>
+        <li><strong>起始值</strong>标为“工程起始值”的阈值只在模拟的录像上检验过，还没有用真实婴儿的录像校准。</li>
+        <li><strong>视频很短</strong>一两分钟只是宝宝一天里很小的一段，所以单次录像的波动很大 <a class="cite" href="#ref-11">[11]</a>。在多次录像中反复出现的规律，比任何一次都更有意义。</li>
+      </ul>
+      <p class="more">目前做了哪些检验：App 里的规则引擎，在 16 段已知答案的模拟录像上与 Python 参考实现的结果一致；其中包括不应触发规则的情况，例如摄像头抖动。</p>
+    </div>
+  </section>
+
+  <section id="observations">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>观察结果从何而来</h2>
+        <p>观察结果是写成规则的，不是从数据里学出来的。每条规则都从一份已发表资料中的描述出发，把它变成对轨迹的一项检查：某个频段内的节律、保持了一段时间的姿势，或者左右两侧的差异。</p>
+        <p>规则只在条件满足时才运行：宝宝的年龄（早产时用矫正年龄）和体位、帧率，以及身体被追踪到的比例都要符合要求。否则规则会弃权，App 会把它列为无法进行的检查。</p>
+      </div>
+      <div class="table-wrap"><table class="data stack">
+          <thead><tr><th scope="col">类别</th><th scope="col">规则描述的内容</th><th scope="col">出处示例</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">节律</th><td data-label="规则描述的内容">快速而细小的抖动；幅度较大的抖动；成串的节律性蹬腿或挥手；一侧持续的节律性抽动</td><td data-label="出处示例"><a class="cite" href="#ref-9">[9]</a> <a class="cite" href="#ref-10">[10]</a></td></tr>
+            <tr><th scope="row">姿势</th><td data-label="规则描述的内容">头总偏向一侧；到了通常已经消退的月龄，仍出现击剑样姿势；双腿向两侧摊开，腿部活动很少</td><td data-label="出处示例">临床指南和参考资料，见<a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/sources.json">出处文件</a></td></tr>
+            <tr><th scope="row">左右差异</th><td data-label="规则描述的内容">大约 15 周以后，一只手臂的活动明显少于另一只</td><td data-label="出处示例">综述文章，见<a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/sources.json">出处文件</a></td></tr>
+            <tr><th scope="row">双手</th><td data-label="规则描述的内容">6 个月以后，看不到双手在身体中线合拢</td><td data-label="出处示例">公共卫生机构的说明资料，见<a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/sources.json">出处文件</a></td></tr>
+          </tbody>
+        </table></div>
+      <div class="after">
+        <p>另有三条规则只存在于研究用的参考实现里，不在 App 中运行：成串出现的全身短暂动作、持续的歪头，以及伸直并交叉的双腿。在能用真实录像检验之前，它们保持关闭。手指和握拳的姿势一律不作判断。</p>
+        <p>婴儿早期运动的临床评估，例如全身运动评估（GMA）<a class="cite" href="#ref-12">[12]</a>，由受过训练的临床人员完成，评估的是全身运动的质量。MoveGrow 不做这类评估，也不能替代它们。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tint" id="licences">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>模型与许可证</h2>
+        <p class="lead">MoveGrow 自己的代码和规则是开源的。两个网络来自其他项目，沿用各自的许可证。</p>
+      </div>
+      <div class="table-wrap"><table class="data stack">
+          <thead><tr><th scope="col">组成部分</th><th scope="col">许可证</th><th scope="col">在哪里</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">MoveGrow App、规则引擎、规则库和出处</th><td data-label="许可证">AGPL-3.0</td><td data-label="在哪里">在<a href="https://github.com/seesaw-earth/MoveGrow">代码库</a>中</td></tr>
+            <tr><th scope="row">YOLO26l-pose（Ultralytics）</th><td data-label="许可证">AGPL-3.0</td><td data-label="在哪里">构建 App 时下载，并核对固定的 SHA-256</td></tr>
+            <tr><th scope="row">用 Swift 重写的 InstantHMR 推理步骤</th><td data-label="许可证">AGPL-3.0（参照 InstantHMR 的 Apache-2.0 代码）</td><td data-label="在哪里">在代码库中</td></tr>
+            <tr><th scope="row">InstantHMR 网络权重</th><td data-label="许可证">SAM License。作者发布的 nano、tiny、small 和 medium 权重仅限非商业用途；另有一个只用允许商用的图片训练的 medium 模型</td><td data-label="在哪里">不在代码库中；构建 App 时编译进去</td></tr>
+            <tr><th scope="row">MHR 人体模型（Meta）</th><td data-label="许可证">Apache-2.0。InstantHMR 自己的人体计算图加入了来自 SAM 3D Body 的数据表，采用 SAM License</td><td data-label="在哪里">不在代码库中；构建 App 时编译进去</td></tr>
+          </tbody>
+        </table></div>
+      <p class="after">某个构建版本包含哪些模型、它们来自哪里，记录在 <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MODEL_PROVENANCE.md">MODEL_PROVENANCE.md</a> 中。</p>
+    </div>
+  </section>
+
+  <section id="cite">
+    <div class="wrap split">
+      <h2>如何引用</h2>
+      <div>
+        <p>如果在研究中使用 MoveGrow，请引用这个软件，以及它所依赖的模型 <a class="cite" href="#ref-1">[1]</a> <a class="cite" href="#ref-2">[2]</a> <a class="cite" href="#ref-3">[3]</a> <a class="cite" href="#ref-4">[4]</a>。</p>
+        <div class="bibtex">
+          <div class="bibtex-bar"><span>BibTeX</span><button type="button" data-copy="bibtex" data-done="已复制">复制</button></div>
+          <pre id="bibtex" lang="en" tabindex="0">@software{shi2026movegrow,
+  author  = {Shi, Ziqing},
+  title   = {{MoveGrow}: an on-device journal of infant movement},
+  year    = {2026},
+  url     = {https://github.com/seesaw-earth/MoveGrow},
+  license = {AGPL-3.0-only}
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tint" id="references">
+    <div class="wrap">
+      <h2>参考文献</h2>
+      <ol class="reflist" lang="en">
+        <li id="ref-1">Adjel M, Chalabi K, Bonnet V. InstantHMR: Real-Time Human Mesh Recovery on Your Phone. HAL preprint hal-05854387, 2026. <a href="https://hal.science/hal-05854387">hal.science/hal-05854387</a></li>
+        <li id="ref-2">Ferguson A, Osman AAA, Bescos B, et al. MHR: Momentum Human Rig. arXiv:2511.15586, 2025. <a href="https://arxiv.org/abs/2511.15586">arxiv.org/abs/2511.15586</a></li>
+        <li id="ref-3">Yang X, Kukreja D, Pinkus D, et al. SAM 3D Body: Robust Full-Body Human Mesh Recovery. arXiv:2602.15989, 2026. <a href="https://arxiv.org/abs/2602.15989">arxiv.org/abs/2602.15989</a></li>
+        <li id="ref-4">Ultralytics. YOLO26: model documentation. <a href="https://docs.ultralytics.com/models/yolo26/">docs.ultralytics.com/models/yolo26</a></li>
+        <li id="ref-5">Jahn L, et al. Comparison of marker-less 2D image-based methods for infant pose estimation. Scientific Reports 2025;15:12148. <a href="https://doi.org/10.1038/s41598-025-96206-0">doi.org/10.1038/s41598-025-96206-0</a></li>
+        <li id="ref-6">Sotoodeh MS, Ossmy O, Donati G, et al. Automatic pose estimation in newborn infants: lessons from the Baby Grow study. Behavior Research Methods 2026;58:82. <a href="https://doi.org/10.3758/s13428-026-02943-z">doi.org/10.3758/s13428-026-02943-z</a></li>
+        <li id="ref-7">Dardaman C, Xu Z, Stone P, Adolph K, Han D, Pavlakos G. Baby Mesh Recovery Enables Infant Behavior Identification. IEEE International Conference on Development and Learning (ICDL), 2026. <a href="https://geopavlakos.github.io/babymesh/">geopavlakos.github.io/babymesh</a></li>
+        <li id="ref-8">Chatzichristodoulou G, Efthymiou N, Filntisis P, Pavlakos G, Maragos P. Age-Inclusive 3D Human Mesh Recovery for Action-Preserving Data Anonymization. arXiv:2512.05259, 2025. <a href="https://arxiv.org/abs/2512.05259">arxiv.org/abs/2512.05259</a></li>
+        <li id="ref-9">Huntsman RJ, Lowry NJ, Sankaran K. Nonepileptic motor phenomena in the neonate. Paediatrics &amp; Child Health 2008;13(8):680–684. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2606074/">pmc.ncbi.nlm.nih.gov/articles/PMC2606074</a></li>
+        <li id="ref-10">Thelen E. Rhythmical stereotypies in normal human infants. Animal Behaviour 1979;27:699–715.</li>
+        <li id="ref-11">Smith BA, et al. Daily quantity of infant leg movement. Sensors 2015;15:19006. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4570357">pmc.ncbi.nlm.nih.gov/articles/PMC4570357</a></li>
+        <li id="ref-12">Einspieler C, Peharz R, Marschik PB. Fidgety movements – tiny in appearance, but huge in impact. Jornal de Pediatria 2016;92(3 Suppl 1):S64–S70. <a href="https://www.jped.com.br/en-fidgety-movements-tiny-in-articulo-S0021755716000516">www.jped.com.br/en-fidgety-movements-tiny-in-articulo-S0021755716000516</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <nav aria-label="MoveGrow">
+      <a href="tech.html">技术</a>
+      <a href="privacy.html">隐私政策</a>
+      <a href="support.html">支持</a>
+      <a href="https://github.com/seesaw-earth/MoveGrow">源代码</a>
+      <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/LICENSE">许可证（AGPL-3.0）</a>
+    </nav>
+    <p class="legal">© 2026 Ziqing Shi. 这个网站不使用 Cookie，也没有数据分析。</p>
+  </div>
+</footer>
+<script src="../assets/site.js?v=20261112"></script>
+</body>
+</html>

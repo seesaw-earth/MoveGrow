@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>How MoveGrow measures movement — MoveGrow</title>
+  <meta name="description" content="The method behind MoveGrow: a 3D body model that runs on the iPhone, the measures computed from it, where they come from and where they stop being reliable.">
+  <link rel="canonical" href="https://seesaw-earth.github.io/MoveGrow/tech.html">
+  <link rel="alternate" hreflang="en" href="https://seesaw-earth.github.io/MoveGrow/tech.html">
+  <link rel="alternate" hreflang="zh-Hans" href="https://seesaw-earth.github.io/MoveGrow/zh/tech.html">
+  <link rel="alternate" hreflang="es" href="https://seesaw-earth.github.io/MoveGrow/es/tech.html">
+  <link rel="alternate" hreflang="x-default" href="https://seesaw-earth.github.io/MoveGrow/tech.html">
+  <meta name="theme-color" content="#F6F8F2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111A10" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icon-32.png">
+  <link rel="apple-touch-icon" href="assets/icon-180.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MoveGrow">
+  <meta property="og:title" content="How MoveGrow measures movement — MoveGrow">
+  <meta property="og:description" content="The method behind MoveGrow: a 3D body model that runs on the iPhone, the measures computed from it, where they come from and where they stop being reliable.">
+  <meta property="og:url" content="https://seesaw-earth.github.io/MoveGrow/tech.html">
+  <meta property="og:image" content="https://seesaw-earth.github.io/MoveGrow/assets/og-en.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The MoveGrow app icon beside a baby’s movement skeleton and arm and leg speed charts.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="zh_CN">
+  <meta property="og:locale:alternate" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="assets/site.css?v=20261112">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="lang-hint" id="lang-hint" hidden><div class="wrap"><span data-offer="zh" lang="zh-Hans" hidden>这个页面有中文版。 <a href="zh/tech.html" hreflang="zh-Hans">查看中文版</a><button type="button">关闭</button></span><span data-offer="es" lang="es" hidden>Esta página también está en español. <a href="es/tech.html" hreflang="es">Ver en español</a><button type="button">Cerrar</button></span></div></div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="assets/icon-180.png" alt="" width="36" height="36">MoveGrow</a>
+    <nav class="site-nav" aria-label="MoveGrow">
+      <a class="section-link" href="./#how">How it works</a>
+      <a class="section-link" href="tech.html" aria-current="page">Technology</a>
+      <a class="section-link" href="privacy.html">Privacy</a>
+      <a class="section-link" href="support.html">Support</a>
+      <a class="section-link" href="https://github.com/seesaw-earth/MoveGrow">Source code</a>
+      <span class="langs" role="group" aria-label="Language"><a href="tech.html" hreflang="en" lang="en" aria-current="true">English</a><a href="zh/tech.html" hreflang="zh-Hans" lang="zh-Hans">中文</a><a href="es/tech.html" hreflang="es" lang="es">Español</a></span>
+    </nav>
+  </div>
+</header>
+<main id="main" class="tech">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1>How MoveGrow<br>measures movement</h1>
+        <p class="lead">MoveGrow turns a home video of a baby into a 3D track of the body, on the iPhone itself, and describes that track with a small set of documented measures. This page explains each step, what the numbers mean and where they stop being reliable.</p>
+        <div class="actions"><a class="button primary" href="https://github.com/seesaw-earth/MoveGrow">Source code</a><a class="button" href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/rules.json">Rule book</a><a class="button" href="https://github.com/seesaw-earth/MoveGrow/blob/main/INSTANTHMR.md">Model notes</a><a class="button" href="#cite">How to cite</a></div>
+        <p class="small byline">By Ziqing Shi. This page describes MoveGrow with the InstantHMR pose engine.<br>Updated November 12, 2026</p>
+      </div>
+      <figure class="specimen">
+        <div class="panel frame-panel">
+          <svg viewBox="0 0 360 450" role="img" aria-label="Drawing: a baby lying on the back, seen from above, with three arrows from the middle of the trunk and a ruler beside the trunk.">
+            <circle class="bf-head" cx="180" cy="92" r="36"/>
+            <circle class="bf-eye" cx="167" cy="88" r="3.5"/><circle class="bf-eye" cx="193" cy="88" r="3.5"/>
+            <path class="bf-bone" d="M180 128V258M136 152H224M154 258H206M136 152L96 122L112 76M224 152L270 178L292 226M154 258L112 312L146 366M206 258L252 304L228 362"/>
+            <g class="bf-joint"><circle cx="136" cy="152" r="5"/><circle cx="224" cy="152" r="5"/><circle cx="96" cy="122" r="5"/><circle cx="270" cy="178" r="5"/><circle cx="154" cy="258" r="5"/><circle cx="206" cy="258" r="5"/><circle cx="112" cy="312" r="5"/><circle cx="252" cy="304" r="5"/><circle cx="112" cy="76" r="7.5"/><circle cx="292" cy="226" r="7.5"/><circle cx="146" cy="366" r="7.5"/><circle cx="228" cy="362" r="7.5"/></g>
+            <path class="bf-rule" d="M104 152V258M94 152H114M94 258H114"/>
+            <text class="bf-label bf-one" x="80" y="213" text-anchor="middle">1</text>
+            <path class="bf-axis" d="M180 205V166M180 205H240"/>
+            <path class="bf-tip" d="M180 150L171 168H189ZM256 205L238 196V214Z"/>
+            <circle class="bf-axis bf-w" cx="180" cy="205" r="11"/><circle class="bf-tip" cx="180" cy="205" r="4"/>
+            <text class="bf-label" x="196" y="182">v</text>
+            <text class="bf-label" x="246" y="232">u</text>
+            <text class="bf-label" x="150" y="234">w</text>
+          </svg>
+        </div>
+        <figcaption>The body frame, in a drawing. Every measure is taken in the baby’s own coordinates: <b>u</b> points to the baby’s left, <b>v</b> towards the head and <b>w</b> out of the chest. Lengths are counted in torso lengths (<b>1</b>: from the middle of the hips to the middle of the shoulders), so neither the camera’s distance nor the baby’s size changes the numbers.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="tint">
+    <div class="wrap split">
+      <h2>Overview</h2>
+      <div>
+        <p>A parent films a baby for a minute or two. In each analysed frame, MoveGrow finds the baby, estimates the 3D position of 70 body keypoints with InstantHMR <a class="cite" href="#ref-1">[1]</a> and the MHR body model <a class="cite" href="#ref-2">[2]</a>, and re-expresses them in the baby’s own body frame. From that track it computes how much and how fast each limb moves, how far the joints bend, where the head points and how the limbs move together.</p>
+        <p>A separate rule book compares the track with movement patterns described in published clinical and developmental texts, and says so when it can’t judge. Every rule names its sources and marks each threshold as taken from the literature or as an engineering starting value.</p>
+        <p>Everything runs on the iPhone. MoveGrow describes movement. It doesn’t score development, screen for conditions or diagnose.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="wrap pipeline">
+      <div class="pipeline-head">
+        <h2>From a frame to a measurement</h2>
+        <p class="lead">Five steps, repeated for every analysed frame.</p>
+      </div>
+      <ol class="stages">
+        <li><h3>Find the baby</h3><p>YOLO26l-pose <a class="cite" href="#ref-4">[4]</a> looks at the frame and returns the largest person. Its box tells the next step where to look. Its own 2D keypoints are kept for comparison and aren’t used in the analysis.</p></li>
+        <li><h3>Estimate the body in 3D</h3><p>InstantHMR reads two crops of that box, a wide one and a closer one, and predicts the pose and shape of the MHR body model, plus 2D keypoints with an uncertainty for each. The network runs on the iPhone’s Neural Engine.</p></li>
+        <li><h3>Fit the pose to the picture</h3><p>One Levenberg–Marquardt step moves the predicted pose so that the projected body lands on the network’s own 2D keypoints, each weighted by its confidence. The fit has no learned parameters.</p></li>
+        <li><h3>Place 70 keypoints</h3><p>The MHR body model turns the fitted parameters into 70 keypoints in the camera’s frame. MoveGrow analyses the body joints. Finger points are drawn and exported, never analysed.</p></li>
+        <li><h3>Measure in the baby’s frame</h3><p>The keypoints are rotated into the body frame and divided by the torso length. The measures below and the rule book both work on this track.</p></li>
+      </ol>
+      <ul class="notes">
+        <li>A first pass at 15 frames per second gives results within seconds. A second pass fills in up to the chosen rate (15, 30 or 60 frames per second; 30 by default) and resumes after an interruption.</li>
+        <li>The app doesn’t read the phone’s focal length from the video. It assumes 1.05 times the frame’s diagonal, as InstantHMR does when the focal length is unknown.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="tint" id="measures">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What is measured</h2>
+        <p class="lead">All from the 3D track, in the body frame. The same numbers feed the review timeline, the summary and the Growth charts.</p>
+      </div>
+      <div class="table-wrap"><table class="data stack">
+          <thead><tr><th scope="col">Measure</th><th scope="col">How it is computed</th><th scope="col">Unit</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Limb speed</th><td data-label="How it is computed">Speed of each wrist and ankle, smoothed over 0.1 s</td><td data-label="Unit">Torso lengths per second</td></tr>
+            <tr><th scope="row">Activity</th><td data-label="How it is computed">Share of time a limb is moving: it starts above 0.18 torso lengths per second and stops below 0.10, with higher thresholds when the trunk’s own keypoints are jittery</td><td data-label="Unit">% of time</td></tr>
+            <tr><th scope="row">Elbow, knee and hip angle</th><td data-label="How it is computed">Shoulder–elbow–wrist, hip–knee–ankle and shoulder–hip–knee, as angles in 3D. The range runs from the 5th to the 95th percentile</td><td data-label="Unit">Degrees (180 = straight)</td></tr>
+            <tr><th scope="row">Head direction</th><td data-label="How it is computed">Where the nose points relative to the midpoint of the ears, in the plane across the trunk. Counted as turned beyond about 15° to one side</td><td data-label="Unit">Share of time left, centre and right</td></tr>
+            <tr><th scope="row">Left–right balance</th><td data-label="How it is computed">(left − right) ÷ (left + right) of the distance each limb travels per minute, for arms and for legs</td><td data-label="Unit">−1 to +1 (0 = equal)</td></tr>
+            <tr><th scope="row">Lift</th><td data-label="How it is computed">How far each hand and foot is in front of the trunk, along w. Lying on the back, that is towards the camera. The summary is the 90th percentile</td><td data-label="Unit">Torso lengths</td></tr>
+            <tr><th scope="row">Hands together</th><td data-label="How it is computed">Distance between the wrists, and the share of time it is under 0.3 torso lengths</td><td data-label="Unit">Torso lengths; % of time</td></tr>
+            <tr><th scope="row">Leg pattern</th><td data-label="How it is computed">Correlation between how the left and the right knee bend and stretch, over about 2 s, while the legs move</td><td data-label="Unit">−1 (in turn) to +1 (together)</td></tr>
+            <tr><th scope="row">Synchrony</th><td data-label="How it is computed">Mean correlation between the speeds of the four limbs, over about 2 s</td><td data-label="Unit">−1 to +1</td></tr>
+            <tr><th scope="row">Overall movement</th><td data-label="How it is computed">Mean speed of the four limbs</td><td data-label="Unit">Torso lengths per second</td></tr>
+            <tr><th scope="row">Tracked share</th><td data-label="How it is computed">Share of analysed frames in which the trunk was found</td><td data-label="Unit">% of frames</td></tr>
+          </tbody>
+        </table></div>
+    </div>
+  </section>
+
+  <section id="engines">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Two pose engines</h2>
+        <p class="lead">InstantHMR is the default. YOLO26l-pose finds the baby for it in every frame, can be chosen as the engine in Settings, and takes over when the 3D models aren’t part of a build.</p>
+      </div>
+      <div class="table-wrap"><table class="data stack all">
+          <thead><tr><th scope="col"></th><th scope="col">InstantHMR, 3D</th><th scope="col">YOLO26l-pose, 2D</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Keypoints</th><td data-label="InstantHMR, 3D">70 in 3D, each with a 2D position and an uncertainty</td><td data-label="YOLO26l-pose, 2D">17 in 2D</td></tr>
+            <tr><th scope="row">Joint angles</th><td data-label="InstantHMR, 3D">Angles in 3D</td><td data-label="YOLO26l-pose, 2D">Angles as they appear in the picture</td></tr>
+            <tr><th scope="row">Movement towards the camera</th><td data-label="InstantHMR, 3D">Measured</td><td data-label="YOLO26l-pose, 2D">Seen only as a limb that looks shorter</td></tr>
+            <tr><th scope="row">Lift, leg pattern, synchrony</th><td data-label="InstantHMR, 3D">Yes</td><td data-label="YOLO26l-pose, 2D">No</td></tr>
+            <tr><th scope="row">Smoothing of the track</th><td data-label="InstantHMR, 3D">None</td><td data-label="YOLO26l-pose, 2D">One-Euro filter</td></tr>
+          </tbody>
+        </table></div>
+    </div>
+  </section>
+
+  <section class="night" id="accuracy">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Accuracy, and what isn’t known yet</h2>
+        <p>InstantHMR’s authors report its accuracy on two public benchmarks, both recorded with adults moving in everyday scenes <a class="cite" href="#ref-1">[1]</a>. The figures are PA-MPJPE: the mean distance between predicted and true joints after the two poses are aligned, in millimetres. Lower is better.</p>
+      </div>
+      <div class="table-wrap"><table class="data">
+          <thead><tr><th scope="col">InstantHMR medium</th><th scope="col">EMDB-1</th><th scope="col">3DPW</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Network alone</th><td data-label="EMDB-1">48.8 mm</td><td data-label="3DPW">40.0 mm</td></tr>
+            <tr><th scope="row">With the two-crop fit</th><td data-label="EMDB-1">44.4 mm</td><td data-label="3DPW">39.3 mm</td></tr>
+          </tbody>
+        </table></div>
+      <p class="after">MoveGrow hasn’t yet measured how well it follows babies. Read the numbers in the app with these limits in mind.</p>
+      <ul class="facts">
+        <li><strong>Built for people in general</strong>Pose models are trained almost entirely on adults and then applied to babies unchanged <a class="cite" href="#ref-5">[5]</a> <a class="cite" href="#ref-6">[6]</a>. Babies’ proportions differ. Work on recovering babies’ and children’s bodies in 3D reports that methods built for adults generalise poorly to them <a class="cite" href="#ref-8">[8]</a>, and uses body models made for babies instead <a class="cite" href="#ref-7">[7]</a>.</li>
+        <li><strong>One camera</strong>Depth is the model’s estimate, not a measurement, and it is the least certain direction. With an assumed focal length the absolute distance can be off, which is why the measures are in torso lengths.</li>
+        <li><strong>What the camera sees</strong>Loose clothes, swaddles and blankets, a caregiver’s hands in the frame and a camera that moves all change the track.</li>
+        <li><strong>Frame rate</strong>At 30 frames per second, rhythms faster than about 15 per second can’t be seen. The rule book asks for at least 24 frames per second before it judges any rhythm.</li>
+        <li><strong>Starting values</strong>Thresholds marked as engineering starting values have been checked only on simulated recordings. They haven’t been calibrated on recordings of real babies.</li>
+        <li><strong>Short videos</strong>A minute or two is a small sample of a baby’s day, so one recording is noisy <a class="cite" href="#ref-11">[11]</a>. Patterns that return across several recordings mean more than any single one.</li>
+      </ul>
+      <p class="more">What is checked today: the rule engine in the app gives the same results as its Python reference on 16 simulated recordings with known answers, including ones that must not trigger a rule, such as a shaking camera.</p>
+    </div>
+  </section>
+
+  <section id="observations">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Where the observations come from</h2>
+        <p>Observations are written as rules. They aren’t learned from data. Each rule starts from a description in a published source and turns it into a check on the track: a rhythm in a frequency band, a posture held for a time, a difference between the two sides.</p>
+        <p>A rule runs only when it can: the baby’s age (corrected for early birth) and position, the frame rate and the share of the body that was tracked all have to fit. Otherwise the rule abstains, and the app lists the check as one it couldn’t run.</p>
+      </div>
+      <div class="table-wrap"><table class="data stack">
+          <thead><tr><th scope="col">Family</th><th scope="col">What a rule describes</th><th scope="col">Examples of sources</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Rhythm</th><td data-label="What a rule describes">Fast, fine shaking; coarse shaking; bouts of rhythmic kicking or waving; sustained rhythmic jerking on one side</td><td data-label="Examples of sources"><a class="cite" href="#ref-9">[9]</a> <a class="cite" href="#ref-10">[10]</a></td></tr>
+            <tr><th scope="row">Posture</th><td data-label="What a rule describes">A preference for turning the head to one side; a fencing posture at an age when it has usually faded; legs resting wide apart with little leg movement</td><td data-label="Examples of sources">Clinical guidance and reference texts, in the <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/sources.json">sources file</a></td></tr>
+            <tr><th scope="row">Side differences</th><td data-label="What a rule describes">One arm moving much less than the other, from about 15 weeks of age</td><td data-label="Examples of sources">Review articles, in the <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/sources.json">sources file</a></td></tr>
+            <tr><th scope="row">Hands</th><td data-label="What a rule describes">Hands not seen together at the middle of the body after six months</td><td data-label="Examples of sources">A public health factsheet, in the <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MoveGrow/Motor/Resources/sources.json">sources file</a></td></tr>
+          </tbody>
+        </table></div>
+      <div class="after">
+        <p>Three more rules exist only in the research reference and don’t run in the app: clusters of brief movements of the whole body, a lasting head tilt, and extended, crossed legs. They stay off until they can be checked against real recordings. Finger and fist postures are never judged.</p>
+        <p>Clinical assessments of early movement, such as the general movements assessment <a class="cite" href="#ref-12">[12]</a>, are made by trained clinicians who judge the quality of whole-body movement. MoveGrow doesn’t perform them or stand in for them.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tint" id="licences">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Models and licences</h2>
+        <p class="lead">MoveGrow’s own code and rules are open source. The two networks come from other projects and keep their own licences.</p>
+      </div>
+      <div class="table-wrap"><table class="data stack">
+          <thead><tr><th scope="col">Part</th><th scope="col">Licence</th><th scope="col">Where it is</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">MoveGrow app, rule engine, rule book and sources</th><td data-label="Licence">AGPL-3.0</td><td data-label="Where it is">In the <a href="https://github.com/seesaw-earth/MoveGrow">repository</a></td></tr>
+            <tr><th scope="row">YOLO26l-pose, from Ultralytics</th><td data-label="Licence">AGPL-3.0</td><td data-label="Where it is">Downloaded when the app is built, and checked against a pinned SHA-256</td></tr>
+            <tr><th scope="row">InstantHMR inference steps, rewritten in Swift</th><td data-label="Licence">AGPL-3.0 (after InstantHMR’s Apache-2.0 code)</td><td data-label="Where it is">In the repository</td></tr>
+            <tr><th scope="row">InstantHMR network weights</th><td data-label="Licence">SAM License. Its authors release the nano, tiny, small and medium weights for non-commercial use only, and a separate medium model trained only on images that allow commercial use</td><td data-label="Where it is">Not in the repository; compiled into the app when it is built</td></tr>
+            <tr><th scope="row">MHR body model, from Meta</th><td data-label="Licence">Apache-2.0. InstantHMR’s own body graph adds tables from SAM 3D Body and is under the SAM License</td><td data-label="Where it is">Not in the repository; compiled into the app when it is built</td></tr>
+          </tbody>
+        </table></div>
+      <p class="after">Which models a build contains, and where they came from, is recorded in <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/MODEL_PROVENANCE.md">MODEL_PROVENANCE.md</a>.</p>
+    </div>
+  </section>
+
+  <section id="cite">
+    <div class="wrap split">
+      <h2>How to cite</h2>
+      <div>
+        <p>If you use MoveGrow in research, please cite the software and the models it builds on <a class="cite" href="#ref-1">[1]</a> <a class="cite" href="#ref-2">[2]</a> <a class="cite" href="#ref-3">[3]</a> <a class="cite" href="#ref-4">[4]</a>.</p>
+        <div class="bibtex">
+          <div class="bibtex-bar"><span>BibTeX</span><button type="button" data-copy="bibtex" data-done="Copied">Copy</button></div>
+          <pre id="bibtex" lang="en" tabindex="0">@software{shi2026movegrow,
+  author  = {Shi, Ziqing},
+  title   = {{MoveGrow}: an on-device journal of infant movement},
+  year    = {2026},
+  url     = {https://github.com/seesaw-earth/MoveGrow},
+  license = {AGPL-3.0-only}
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tint" id="references">
+    <div class="wrap">
+      <h2>References</h2>
+      <ol class="reflist" lang="en">
+        <li id="ref-1">Adjel M, Chalabi K, Bonnet V. InstantHMR: Real-Time Human Mesh Recovery on Your Phone. HAL preprint hal-05854387, 2026. <a href="https://hal.science/hal-05854387">hal.science/hal-05854387</a></li>
+        <li id="ref-2">Ferguson A, Osman AAA, Bescos B, et al. MHR: Momentum Human Rig. arXiv:2511.15586, 2025. <a href="https://arxiv.org/abs/2511.15586">arxiv.org/abs/2511.15586</a></li>
+        <li id="ref-3">Yang X, Kukreja D, Pinkus D, et al. SAM 3D Body: Robust Full-Body Human Mesh Recovery. arXiv:2602.15989, 2026. <a href="https://arxiv.org/abs/2602.15989">arxiv.org/abs/2602.15989</a></li>
+        <li id="ref-4">Ultralytics. YOLO26: model documentation. <a href="https://docs.ultralytics.com/models/yolo26/">docs.ultralytics.com/models/yolo26</a></li>
+        <li id="ref-5">Jahn L, et al. Comparison of marker-less 2D image-based methods for infant pose estimation. Scientific Reports 2025;15:12148. <a href="https://doi.org/10.1038/s41598-025-96206-0">doi.org/10.1038/s41598-025-96206-0</a></li>
+        <li id="ref-6">Sotoodeh MS, Ossmy O, Donati G, et al. Automatic pose estimation in newborn infants: lessons from the Baby Grow study. Behavior Research Methods 2026;58:82. <a href="https://doi.org/10.3758/s13428-026-02943-z">doi.org/10.3758/s13428-026-02943-z</a></li>
+        <li id="ref-7">Dardaman C, Xu Z, Stone P, Adolph K, Han D, Pavlakos G. Baby Mesh Recovery Enables Infant Behavior Identification. IEEE International Conference on Development and Learning (ICDL), 2026. <a href="https://geopavlakos.github.io/babymesh/">geopavlakos.github.io/babymesh</a></li>
+        <li id="ref-8">Chatzichristodoulou G, Efthymiou N, Filntisis P, Pavlakos G, Maragos P. Age-Inclusive 3D Human Mesh Recovery for Action-Preserving Data Anonymization. arXiv:2512.05259, 2025. <a href="https://arxiv.org/abs/2512.05259">arxiv.org/abs/2512.05259</a></li>
+        <li id="ref-9">Huntsman RJ, Lowry NJ, Sankaran K. Nonepileptic motor phenomena in the neonate. Paediatrics &amp; Child Health 2008;13(8):680–684. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2606074/">pmc.ncbi.nlm.nih.gov/articles/PMC2606074</a></li>
+        <li id="ref-10">Thelen E. Rhythmical stereotypies in normal human infants. Animal Behaviour 1979;27:699–715.</li>
+        <li id="ref-11">Smith BA, et al. Daily quantity of infant leg movement. Sensors 2015;15:19006. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4570357">pmc.ncbi.nlm.nih.gov/articles/PMC4570357</a></li>
+        <li id="ref-12">Einspieler C, Peharz R, Marschik PB. Fidgety movements – tiny in appearance, but huge in impact. Jornal de Pediatria 2016;92(3 Suppl 1):S64–S70. <a href="https://www.jped.com.br/en-fidgety-movements-tiny-in-articulo-S0021755716000516">www.jped.com.br/en-fidgety-movements-tiny-in-articulo-S0021755716000516</a></li>
+      </ol>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <nav aria-label="MoveGrow">
+      <a href="tech.html">Technology</a>
+      <a href="privacy.html">Privacy policy</a>
+      <a href="support.html">Support</a>
+      <a href="https://github.com/seesaw-earth/MoveGrow">Source code</a>
+      <a href="https://github.com/seesaw-earth/MoveGrow/blob/main/LICENSE">License (AGPL-3.0)</a>
+    </nav>
+    <p class="legal">© 2026 Ziqing Shi. This site uses no cookies and no analytics.</p>
+  </div>
+</footer>
+<script src="assets/site.js?v=20261112"></script>
+</body>
+</html>

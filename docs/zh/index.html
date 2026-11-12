@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>MoveGrow：宝宝动作的私密日记</title>
-  <meta name="description" content="拍下宝宝的动作，MoveGrow 就在你的 iPhone 上追踪手臂、腿和头部，并展示几周来动作的变化。无需账户，不上传，开源。">
+  <meta name="description" content="拍下宝宝的动作，MoveGrow 就在你的 iPhone 上以三维方式追踪手臂、腿和头部，并展示几周来动作的变化。无需账户，不上传，开源。">
   <link rel="canonical" href="https://seesaw-earth.github.io/MoveGrow/zh/">
   <link rel="alternate" hreflang="en" href="https://seesaw-earth.github.io/MoveGrow/">
   <link rel="alternate" hreflang="zh-Hans" href="https://seesaw-earth.github.io/MoveGrow/zh/">
@@ -20,7 +20,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MoveGrow">
   <meta property="og:title" content="MoveGrow：宝宝动作的私密日记">
-  <meta property="og:description" content="拍下宝宝的动作，MoveGrow 就在你的 iPhone 上追踪手臂、腿和头部，并展示几周来动作的变化。无需账户，不上传，开源。">
+  <meta property="og:description" content="拍下宝宝的动作，MoveGrow 就在你的 iPhone 上以三维方式追踪手臂、腿和头部，并展示几周来动作的变化。无需账户，不上传，开源。">
   <meta property="og:url" content="https://seesaw-earth.github.io/MoveGrow/zh/">
   <meta property="og:image" content="https://seesaw-earth.github.io/MoveGrow/assets/og-zh.png">
   <meta property="og:image:width" content="1200">
@@ -30,7 +30,7 @@
   <meta property="og:locale:alternate" content="en_US">
   <meta property="og:locale:alternate" content="es_ES">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="../assets/site.css?v=20261103">
+  <link rel="stylesheet" href="../assets/site.css?v=20261112">
 </head>
 <body>
 <a class="skip" href="#main">跳到正文</a>
@@ -40,6 +40,7 @@
     <a class="brand" href="./"><img src="../assets/icon-180.png" alt="" width="36" height="36">MoveGrow</a>
     <nav class="site-nav" aria-label="MoveGrow">
       <a class="section-link" href="#how">使用方式</a>
+      <a class="section-link" href="tech.html">技术</a>
       <a class="section-link" href="privacy.html">隐私</a>
       <a class="section-link" href="support.html">支持</a>
       <a class="section-link" href="https://github.com/seesaw-earth/MoveGrow">源代码</a>
@@ -52,7 +53,7 @@
     <div class="wrap">
       <div class="hero-copy">
         <h1>看见每个动作，<br>也看见成长。</h1>
-        <p class="lead">MoveGrow 是一本私密的宝宝动作日记，就在你的 iPhone 上。拍一两分钟视频，App 会在手机上直接追踪宝宝的手臂、腿和头部，再展示几周来动作的变化。</p>
+        <p class="lead">MoveGrow 是一本私密的宝宝动作日记，就在你的 iPhone 上。拍一两分钟视频，App 会在手机上直接以三维方式追踪宝宝的手臂、腿和头部，再展示几周来动作的变化。</p>
         <div class="actions">
           <!-- When MoveGrow is on the App Store, put the Download on the App Store badge first here. -->
           <a class="button primary" href="#how">了解使用方式</a>
@@ -65,7 +66,7 @@
           <div class="readout" aria-hidden="true"><span class="time" id="hero-time">0:10</span><span class="pills"><span class="pill" data-limb="L_arm">左臂</span><span class="pill" data-limb="R_arm">右臂</span><span class="pill" data-limb="L_leg">左腿</span><span class="pill" data-limb="R_leg">右腿</span></span></div>
           <canvas id="hero-canvas" role="img" aria-label="动画：一个模拟宝宝的骨架在蹬腿，下方是手臂和腿的速度曲线。" data-arms="手臂" data-legs="腿"></canvas>
         </div>
-        <figcaption>这不是真实的宝宝：画面来自 MoveGrow 测试数据中一段模拟的蹬腿动作，按 App 的方式绘制。下方是每只手臂和每条腿的速度；实线表示左侧，虚线表示右侧。</figcaption>
+        <figcaption>这不是真实的宝宝：画面来自 MoveGrow 测试数据中一段模拟的蹬腿动作，画成简单的骨架。下方是每只手臂和每条腿的速度；实线表示左侧，虚线表示右侧。</figcaption>
       </figure>
     </div>
   </section>
@@ -78,8 +79,8 @@
       </div>
       <ol class="steps">
         <li><h3>拍摄或选择视频</h3><p>让宝宝仰躺，从上方拍一两分钟。也可以从“照片”中一次选择最多 10 个视频，总时长不超过 20 分钟。</p></li>
-        <li><h3>在 iPhone 上完成追踪</h3><p>姿态模型按视频的原始帧率，在每一帧中找出身体的关键点。不会上传任何内容；分析时你也可以继续使用 App。</p></li>
-        <li><h3>看见动作，也看见变化</h3><p>回放时显示骨架，在同一条时间线上查看每个肢体，再看活动量、速度和左右平衡在几天、几周里的变化。</p></li>
+        <li><h3>在 iPhone 上完成三维追踪</h3><p>两个模型都在手机上运行：一个在每一帧中找到宝宝，另一个估计身体的三维姿态，默认每秒 30 次。不会上传任何内容；分析时你也可以继续使用 App。</p></li>
+        <li><h3>看见动作，也看见变化</h3><p>回放视频时，三维人偶会跟着宝宝的动作一起动；在同一条时间线上查看每个肢体，再看活动量、速度和左右平衡在几天、几周里的变化。</p></li>
       </ol>
     </div>
   </section>
@@ -88,12 +89,12 @@
     <div class="wrap">
       <div class="section-head"><h2>MoveGrow 能让你看到什么</h2></div>
       <div class="features">
-        <div><h3>画在你自己视频上的骨架</h3><p>播放时，手臂、腿和头部的骨架会叠加在视频上，测量了什么一目了然。</p></div>
-        <div><h3>一条时间线，看全部动作</h3><p>手臂和腿的速度、肘和膝的角度、左右平衡和头部朝向共用一条时间轴。轻点任意位置，视频就会跳到那里。</p></div>
-        <div><h3>按天、按周看成长</h3><p>活动量、速度、左右平衡、关节活动范围和转头，可以按日期或按宝宝的年龄查看；填写预产期后会使用矫正年龄。</p></div>
+        <div><h3>和宝宝动作一致的三维人偶</h3><p>三维视图把追踪结果画成一个柔软的玩偶宝宝，跟着视频一起动。每个关节都在分析得出的位置上，只有身体的粗细是画出来的。可以转动它，从侧面或上方查看。</p></div>
+        <div><h3>一条时间线，看全部动作</h3><p>手臂和腿的速度，肘、膝和髋的角度，左右平衡，头部朝向，手脚抬起的高度，以及两腿是同时蹬还是交替蹬，共用一条时间轴。轻点任意位置，视频就会跳到那里。</p></div>
+        <div><h3>按天、按周看成长</h3><p>活动量、速度、左右平衡、关节活动范围、抬起高度、协调性和转头，可以按日期或按宝宝的年龄查看；填写预产期后会使用矫正年龄。</p></div>
         <div><h3>有背景说明的观察</h3><p>临床文献中描述过的模式，例如新生儿的细微抖动，或明显偏向一侧转头，都会附上为什么提到它，以及你可以做什么。它们只是描述，不是诊断。</p></div>
         <div><h3>贴合现实的日期</h3><p>MoveGrow 会从视频中读取拍摄日期。如果没有，你可以选择具体日期、宝宝出生后的天数，或者只填“大约六周大”。</p></div>
-        <div><h3>只分享你选择的内容</h3><p>可以导出带骨架和图表的视频，也可以把成长图表导出成一张图片，带去体检时给医生看。</p></div>
+        <div><h3>只分享你选择的内容</h3><p>可以导出带图表的视频，也可以把成长图表导出成一张图片，带去体检时给医生看。三维追踪结果还可以导出为数据文件，供研究使用。</p></div>
       </div>
     </div>
   </section>
@@ -124,10 +125,10 @@
 
   <section class="tint">
     <div class="wrap split">
-      <h2>从模型到图表，全部开源</h2>
+      <h2>代码开源，规则公开</h2>
       <div>
-        <p>MoveGrow 是自由软件，采用 GNU Affero 通用公共许可证第 3 版。它使用在 iPhone 上运行的 Ultralytics YOLO26 姿态模型。每条观察背后的规则都是公开的数据，并注明了出处，任何人都可以查看。</p>
-        <p class="actions"><a class="button" href="https://github.com/seesaw-earth/MoveGrow">在 GitHub 上查看 MoveGrow</a></p>
+        <p>MoveGrow 的代码是自由软件，采用 GNU Affero 通用公共许可证第 3 版。每条观察背后的规则都是公开的数据，并注明了出处，任何人都可以查看。有两个模型在 iPhone 上运行：Ultralytics YOLO26 负责找到宝宝，InstantHMR 配合 Meta 的 MHR 人体模型估计三维姿态。这些模型各有自己的许可证，详见“技术”页面。</p>
+        <p class="actions"><a class="button" href="tech.html">了解它如何测量动作</a><a class="button" href="https://github.com/seesaw-earth/MoveGrow">在 GitHub 上查看 MoveGrow</a></p>
       </div>
     </div>
   </section>
@@ -140,7 +141,8 @@
       <details><summary>支持哪些 iPhone？</summary><p>运行 iOS 17 或更高版本的 iPhone。较新的机型分析更快。分析时你可以继续使用 App；在 iOS 26 上，它还会在后台继续进行。</p></details>
       <details><summary>宝宝是早产的，有影响吗？</summary><p>如果宝宝提前两周或以上出生，请在宝宝资料里填写预产期。24 个月前，图表和检查会使用矫正年龄，与儿科的做法一致。</p></details>
       <details><summary>MoveGrow 是医疗器械吗？</summary><p>不是。它是描述动作的私人视频日记，不是筛查测试，也不是诊断。如有任何担心，请咨询儿科医生。</p></details>
-      <details><summary>换手机时怎么保留视频？</summary><p>为了保护隐私，MoveGrow 的数据不会进入自动备份。换手机前，请把想保留的视频导出到“照片”或“文件”，可以是原始视频，也可以是带骨架和图表的 MP4。</p></details>
+      <details><summary>三维人偶有多准确？</summary><p>它是根据单个摄像头做出的估计。背后的模型面向的是一般人群，并非专门为婴儿设计，MoveGrow 也还没有测量过它在婴儿身上的准确度。所以 App 用宝宝自己的躯干长度作单位，并且看的是一段时间里的规律。“技术”页面说明了方法和局限。</p></details>
+      <details><summary>换手机时怎么保留视频？</summary><p>为了保护隐私，MoveGrow 的数据不会进入自动备份。换手机前，请把想保留的视频导出到“照片”或“文件”，可以是原始视频，也可以是带图表的 MP4。</p></details>
       <details><summary>支持哪些语言？</summary><p>English、简体中文和 Español。可以随时在 App 的“设置”中切换。</p></details>
       <details><summary>需要付费吗？</summary><p>MoveGrow 免费、开源，没有广告，也没有 App 内购买。</p></details>
     </div>
@@ -149,6 +151,7 @@
 <footer class="site-footer">
   <div class="wrap">
     <nav aria-label="MoveGrow">
+      <a href="tech.html">技术</a>
       <a href="privacy.html">隐私政策</a>
       <a href="support.html">支持</a>
       <a href="https://github.com/seesaw-earth/MoveGrow">源代码</a>
@@ -157,8 +160,8 @@
     <p class="legal">© 2026 Ziqing Shi. 这个网站不使用 Cookie，也没有数据分析。</p>
   </div>
 </footer>
-<script src="../assets/site.js?v=20261103"></script>
-<script src="../assets/motion.js?v=20261103"></script>
-<script src="../assets/hero.js?v=20261103"></script>
+<script src="../assets/site.js?v=20261112"></script>
+<script src="../assets/motion.js?v=20261112"></script>
+<script src="../assets/hero.js?v=20261112"></script>
 </body>
 </html>

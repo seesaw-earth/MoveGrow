@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>MoveGrow — a private journal of your baby’s movement</title>
-  <meta name="description" content="Film your baby, and MoveGrow follows arms, legs and head on your iPhone, then shows how movement changes over the weeks. No account, no uploads, open source.">
+  <meta name="description" content="Film your baby, and MoveGrow follows arms, legs and head in 3D on your iPhone, then shows how movement changes over the weeks. No account, no uploads, open source.">
   <link rel="canonical" href="https://seesaw-earth.github.io/MoveGrow/">
   <link rel="alternate" hreflang="en" href="https://seesaw-earth.github.io/MoveGrow/">
   <link rel="alternate" hreflang="zh-Hans" href="https://seesaw-earth.github.io/MoveGrow/zh/">
@@ -20,7 +20,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MoveGrow">
   <meta property="og:title" content="MoveGrow — a private journal of your baby’s movement">
-  <meta property="og:description" content="Film your baby, and MoveGrow follows arms, legs and head on your iPhone, then shows how movement changes over the weeks. No account, no uploads, open source.">
+  <meta property="og:description" content="Film your baby, and MoveGrow follows arms, legs and head in 3D on your iPhone, then shows how movement changes over the weeks. No account, no uploads, open source.">
   <meta property="og:url" content="https://seesaw-earth.github.io/MoveGrow/">
   <meta property="og:image" content="https://seesaw-earth.github.io/MoveGrow/assets/og-en.png">
   <meta property="og:image:width" content="1200">
@@ -30,7 +30,7 @@
   <meta property="og:locale:alternate" content="zh_CN">
   <meta property="og:locale:alternate" content="es_ES">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="assets/site.css?v=20261103">
+  <link rel="stylesheet" href="assets/site.css?v=20261112">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -40,6 +40,7 @@
     <a class="brand" href="./"><img src="assets/icon-180.png" alt="" width="36" height="36">MoveGrow</a>
     <nav class="site-nav" aria-label="MoveGrow">
       <a class="section-link" href="#how">How it works</a>
+      <a class="section-link" href="tech.html">Technology</a>
       <a class="section-link" href="privacy.html">Privacy</a>
       <a class="section-link" href="support.html">Support</a>
       <a class="section-link" href="https://github.com/seesaw-earth/MoveGrow">Source code</a>
@@ -52,7 +53,7 @@
     <div class="wrap">
       <div class="hero-copy">
         <h1>Watch them move.<br>Watch them grow.</h1>
-        <p class="lead">MoveGrow is a private iPhone journal of your baby’s movement. Film a minute or two, and the app follows arms, legs and head on the phone itself, then shows how movement changes over the weeks.</p>
+        <p class="lead">MoveGrow is a private iPhone journal of your baby’s movement. Film a minute or two, and the app follows arms, legs and head in 3D on the phone itself, then shows how movement changes over the weeks.</p>
         <div class="actions">
           <!-- When MoveGrow is on the App Store, put the Download on the App Store badge first here. -->
           <a class="button primary" href="#how">How it works</a>
@@ -65,7 +66,7 @@
           <div class="readout" aria-hidden="true"><span class="time" id="hero-time">0:10</span><span class="pills"><span class="pill" data-limb="L_arm">L arm</span><span class="pill" data-limb="R_arm">R arm</span><span class="pill" data-limb="L_leg">L leg</span><span class="pill" data-limb="R_leg">R leg</span></span></div>
           <canvas id="hero-canvas" role="img" aria-label="Animation: the skeleton of a simulated baby kicking, with the speed of the arms and legs traced underneath." data-arms="Arms" data-legs="Legs"></canvas>
         </div>
-        <figcaption>Not a real baby: a simulated kicking sequence from MoveGrow’s test data, drawn the way the app draws it. Below it, the speed of each arm and leg; solid lines are the left side, dashed lines the right.</figcaption>
+        <figcaption>Not a real baby: a simulated kicking sequence from MoveGrow’s test data, drawn as a simple skeleton. Below it, the speed of each arm and leg; solid lines are the left side, dashed lines the right.</figcaption>
       </figure>
     </div>
   </section>
@@ -78,8 +79,8 @@
       </div>
       <ol class="steps">
         <li><h3>Film or choose a video</h3><p>Lay your baby on their back and film from above for a minute or two. Or pick up to 10 videos from Photos, up to 20 minutes in total.</p></li>
-        <li><h3>Tracked on your iPhone</h3><p>A pose model finds the body’s key points in every frame, at the video’s own frame rate. Nothing is uploaded, and you can keep using the app while it works.</p></li>
-        <li><h3>See it, and see it change</h3><p>Replay with the skeleton, follow each limb on one timeline, and watch activity, speed and balance across days and weeks.</p></li>
+        <li><h3>Followed in 3D on your iPhone</h3><p>Two models work on the phone: one finds your baby in each frame, the other estimates the body in 3D, 30 times a second by default. Nothing is uploaded, and you can keep using the app while it works.</p></li>
+        <li><h3>See it, and see it change</h3><p>Replay the video with a 3D figure that moves as your baby did, follow each limb on one timeline, and watch activity, speed and balance across days and weeks.</p></li>
       </ol>
     </div>
   </section>
@@ -88,12 +89,12 @@
     <div class="wrap">
       <div class="section-head"><h2>What MoveGrow shows you</h2></div>
       <div class="features">
-        <div><h3>The skeleton on your own video</h3><p>Arms, legs and head are drawn over the video as it plays, so you can see exactly what was measured.</p></div>
-        <div><h3>One timeline for every movement</h3><p>Arm and leg speed, elbow and knee angles, left–right balance and head direction share one time axis. Tap anywhere to jump there in the video.</p></div>
-        <div><h3>Growth over days and weeks</h3><p>Activity, speed, balance, joint range and head turning, by date or by your baby’s age, corrected for early birth when you add the due date.</p></div>
+        <div><h3>A 3D figure that moves like your baby</h3><p>The 3D view shows the track as a soft, toy-like baby that follows the video. Every joint is where the analysis put it; only the body’s thickness is drawn. Turn it to look from the side or from above.</p></div>
+        <div><h3>One timeline for every movement</h3><p>Arm and leg speed, elbow, knee and hip angles, left–right balance, head direction, how high hands and feet lift, and whether the legs kick together or in turn share one time axis. Tap anywhere to jump there in the video.</p></div>
+        <div><h3>Growth over days and weeks</h3><p>Activity, speed, balance, joint range, lift, coordination and head turning, by date or by your baby’s age, corrected for early birth when you add the due date.</p></div>
         <div><h3>Observations, with context</h3><p>Patterns described in clinical literature, such as fine newborn tremor or a strong head-turn preference, come with why they are mentioned and what you can do. They describe; they don’t diagnose.</p></div>
         <div><h3>Dates that fit real life</h3><p>MoveGrow reads the filming date from the video. If it’s missing, set the day, your baby’s age in days, or simply “about six weeks old”.</p></div>
-        <div><h3>Share only what you choose</h3><p>Export a video with the skeleton and charts, or one image of the growth charts to bring to a check-up.</p></div>
+        <div><h3>Share only what you choose</h3><p>Export a video with the charts, or one image of the growth charts to bring to a check-up. The 3D track can be exported as a data file for research.</p></div>
       </div>
     </div>
   </section>
@@ -124,10 +125,10 @@
 
   <section class="tint">
     <div class="wrap split">
-      <h2>Open source, from model to chart</h2>
+      <h2>Open code, open rules</h2>
       <div>
-        <p>MoveGrow is free software under the GNU Affero General Public License v3. It uses the Ultralytics YOLO26 pose model, which runs on the iPhone. The rules behind each observation are open data, each with its sources, and anyone can read them.</p>
-        <p class="actions"><a class="button" href="https://github.com/seesaw-earth/MoveGrow">View MoveGrow on GitHub</a></p>
+        <p>MoveGrow’s code is free software under the GNU Affero General Public License v3. The rules behind each observation are open data, each with its sources, and anyone can read them. Two models run on the iPhone: Ultralytics YOLO26 finds your baby, and InstantHMR with Meta’s MHR body model estimates the 3D pose. The models keep their own licences, listed on the Technology page.</p>
+        <p class="actions"><a class="button" href="tech.html">Read how it measures movement</a><a class="button" href="https://github.com/seesaw-earth/MoveGrow">View MoveGrow on GitHub</a></p>
       </div>
     </div>
   </section>
@@ -140,7 +141,8 @@
       <details><summary>Which iPhones does it work on?</summary><p>iPhones with iOS 17 or later. Analysis is quicker on newer models. You can keep using the app while it runs, and on iOS 26 it carries on in the background.</p></details>
       <details><summary>My baby was born early. Does that matter?</summary><p>If your baby was born two or more weeks early, add the due date in your baby’s profile. Until 24 months, charts and checks then use corrected age, as pediatric guidance does.</p></details>
       <details><summary>Is MoveGrow a medical device?</summary><p>No. It is a personal video journal that describes movement. It isn’t a screening test or a diagnosis. Talk to your pediatrician about any concern.</p></details>
-      <details><summary>How do I keep my videos when I change phones?</summary><p>To keep it private, MoveGrow leaves its data out of automatic backups. Before changing phones, export the videos you want to keep, as originals or as an MP4 with skeleton and charts, to Photos or Files.</p></details>
+      <details><summary>How accurate is the 3D figure?</summary><p>It is an estimate from a single camera. The model behind it was built for people in general, not for babies in particular, and MoveGrow hasn’t yet measured how well it follows babies. So the app counts in your baby’s own torso lengths and looks at patterns over time. The Technology page explains the method and its limits.</p></details>
+      <details><summary>How do I keep my videos when I change phones?</summary><p>To keep it private, MoveGrow leaves its data out of automatic backups. Before changing phones, export the videos you want to keep, as originals or as an MP4 with the charts, to Photos or Files.</p></details>
       <details><summary>Which languages does it speak?</summary><p>English, Simplified Chinese and Spanish. You can switch at any time in the app’s Settings.</p></details>
       <details><summary>Does it cost anything?</summary><p>MoveGrow is free and open source, with no ads and no in-app purchases.</p></details>
     </div>
@@ -149,6 +151,7 @@
 <footer class="site-footer">
   <div class="wrap">
     <nav aria-label="MoveGrow">
+      <a href="tech.html">Technology</a>
       <a href="privacy.html">Privacy policy</a>
       <a href="support.html">Support</a>
       <a href="https://github.com/seesaw-earth/MoveGrow">Source code</a>
@@ -157,8 +160,8 @@
     <p class="legal">© 2026 Ziqing Shi. This site uses no cookies and no analytics.</p>
   </div>
 </footer>
-<script src="assets/site.js?v=20261103"></script>
-<script src="assets/motion.js?v=20261103"></script>
-<script src="assets/hero.js?v=20261103"></script>
+<script src="assets/site.js?v=20261112"></script>
+<script src="assets/motion.js?v=20261112"></script>
+<script src="assets/hero.js?v=20261112"></script>
 </body>
 </html>

@@ -20,3 +20,34 @@
     try { localStorage.setItem(key, "dismissed"); } catch (e) {}
   });
 })();
+
+/* Copy buttons (the BibTeX entry on the Technology page): data-copy names the element whose text is
+   copied, data-done is the label shown for a moment afterwards. Without clipboard access the text is
+   selected instead, ready to copy by hand. */
+(function () {
+  "use strict";
+  var buttons = document.querySelectorAll("button[data-copy]");
+  Array.prototype.forEach.call(buttons, function (button) {
+    var label = button.textContent;
+    button.addEventListener("click", function () {
+      var source = document.getElementById(button.getAttribute("data-copy"));
+      if (!source) return;
+      function select() {
+        var range = document.createRange();
+        range.selectNodeContents(source);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      function done() {
+        button.textContent = button.getAttribute("data-done") || label;
+        setTimeout(function () { button.textContent = label; }, 1800);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(source.textContent).then(done, select);
+      } else {
+        select();
+      }
+    });
+  });
+})();
