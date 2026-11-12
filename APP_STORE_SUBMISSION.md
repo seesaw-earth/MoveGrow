@@ -1,3 +1,51 @@
+# MoveGrow 1.2 (build 4) — before you archive and upload
+
+The 1.0 checklist below still applies; these are the additions for the InstantHMR release.
+
+## Identity
+
+- Version **1.2**, build **4** (`CURRENT_PROJECT_VERSION` was 3; App Store Connect refuses a build number it
+  has seen before). If 1.2 is already live on the App Store, raise `MARKETING_VERSION` to 1.3 as well (in both
+  build configurations, and in `Checks/static-check.py`).
+
+## InstantHMR models (Medium only)
+
+1. In `~/Downloads/coreml`, keep `InstantHMRMediumNet`, `InstantHMRFit2`, `InstantHMRFit1` (optional) and
+   `MHRBodyKeypoints`. Small / Tiny / Nano are not shipped; you can delete them.
+2. Make sure `InstantHMRMediumNet` was converted from the **`medium_commercial`** checkpoint. Plain `medium`,
+   like nano / tiny / small, is licensed for non-commercial use only.
+3. Clear the download quarantine once at the source (the build does it again for the app):
+   `xattr -dr com.apple.quarantine ~/Downloads/coreml`
+4. Product → Clean Build Folder, then Product → Archive. The archive stops if the Medium network, Fit2 or
+   MHRBodyKeypoints is missing, or if a Small / Tiny / Nano package is inside the project.
+5. Copy the `weight.bin SHA-256` line from the build log into `MODEL_PROVENANCE.md`.
+
+## Check the archive before uploading
+
+```sh
+APP="$(ls -td ~/Library/Developer/Xcode/Archives/*/MoveGrow*.xcarchive | head -1)/Products/Applications/MoveGrow.app"
+find "$APP" -xattrname com.apple.quarantine          # must print nothing (TMS-91109)
+ls "$APP" | grep mlmodelc                            # InstantHMRMediumNet, InstantHMRFit2, (InstantHMRFit1),
+                                                     # MHRBodyKeypoints, yolo26l-pose — and nothing else
+```
+
+Then on a device: Settings → Pose engine shows InstantHMR (3D) with no model-size choice; a new video gets a 3D
+tab; Settings → Open source & licences opens the SAM License and Apache License 2.0 texts.
+
+## Metadata to update in App Store Connect
+
+- Description and review notes still describe a **pose skeleton over the video**. Since this release no
+  skeleton is shown by default; the 3D tab shows a baby figure instead (⋯ → YOLO pose shows the 2D skeleton on
+  request). Update both, or App Review will look for a skeleton that isn't there.
+- Review notes say the app gives no screening results, but observations include "Talk to a doctor soon" flags
+  (e.g. clusters of brief synchronous movements, one-sided rhythmic jerking). Describe them openly: they are
+  descriptive, cite published descriptions (Sources in the app), say the app cannot tell what the movement
+  was, and point to a clinician. A suggested text is in `APP_STORE_METADATA.md` → *1.2 review notes*.
+- Licences: the AGPL / App Store question in `LICENSE_COMPATIBILITY_NOTE.md` now also covers the InstantHMR
+  weights (SAM License: field-of-use limits and no reverse engineering) inside an AGPL app.
+
+---
+
 # MoveGrow 1.0 — App Store Submission Checklist
 
 ## Identity

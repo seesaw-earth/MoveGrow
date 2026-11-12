@@ -1,459 +1,462 @@
 // MoveGrow — Copyright (C) 2026 Ziqing Shi
 // SPDX-License-Identifier: AGPL-3.0-only
+//
+// The review screen. The video stays on top (no skeleton over it; YOLO's 2D skeleton is in ⋯ → YOLO
+// pose) with a timeline under it to drag through — events are dots on it, and reaching one shows its
+// name on the video for a moment — then time and frame stepping, and four tabs: Kinematics (the parameter timeline; "Hold to
+// move" to scrub it), 3D (the baby figure following the video), Summary (activity on the baby,
+// activity map, left and right, movement, joint range) and Noticed (event navigation, observations,
+// possible milestones). While the video is analysed, its progress is shown above. Text only on demand.
 
 import SwiftUI
 import AVKit
 
-@MainActor final class ClipPlayer: ObservableObject {
-    let player: AVPlayer
-    private var boundary: Any?
-    private var observer: Any?
-    private var seekID = UUID()
-    @Published var position = 0.0
-    @Published var playingClip = false
-    init(url:URL) {
-        player = AVPlayer(url:url)
-        observer = player.addPeriodicTimeObserver(forInterval:CMTime(seconds:0.1,preferredTimescale:600),queue:.main) { [weak self] time in
-            let seconds = time.seconds
-            guard seconds.isFinite else { return }
-            Task { @MainActor [weak self] in
-                self?.position = seconds
-            }
-        }
-    }
-    func play(start:Double,end:Double?) {
-        player.pause()
-        let request = UUID(); seekID = request
-        player.currentItem?.cancelPendingSeeks()
-        player.currentItem?.forwardPlaybackEndTime = end.map { CMTime(seconds:$0,preferredTimescale:600) } ?? .invalid
-        if let boundary { player.removeTimeObserver(boundary);self.boundary = nil }
-        playingClip = end != nil
-        if let end {
-            boundary = player.addBoundaryTimeObserver(forTimes:[NSValue(time:CMTime(seconds:end,preferredTimescale:600))],queue:.main) { [weak self] in
-                Task { @MainActor [weak self] in
-                    self?.player.pause()
-                }
-            }
-        }
-        player.seek(to:CMTime(seconds:max(0,start),preferredTimescale:600),toleranceBefore:.zero,toleranceAfter:.zero) { [weak self] finished in
-            guard finished else { return }
-            Task { @MainActor [weak self] in
-                guard let self, self.seekID == request else { return }
-                self.player.play()
-            }
-        }
-    }
-    func stop() { seekID = UUID(); player.currentItem?.cancelPendingSeeks(); player.pause() }
-    deinit {
-        if let observer { player.removeTimeObserver(observer) }
-        if let boundary { player.removeTimeObserver(boundary) }
-    }
-}
-
-private struct PlaybackSkeletonOverlay: View {
-    let sample: MotionSample?
-
-    var body: some View {
-        GeometryReader { geo in
-            if let sample, sample.lightOK {
-                ZStack {
-                    Path { path in
-                        for (a, b) in BodyJoint.connections {
-                            guard let p = visiblePoint(sample, joint: a),
-                                  let q = visiblePoint(sample, joint: b) else { continue }
-                            path.move(to: scaled(p, geo.size))
-                            path.addLine(to: scaled(q, geo.size))
-                        }
-                    }
-                    .stroke(
-                        Color.mint.opacity(0.96),
-                        style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
-                    )
-
-                    ForEach(BodyJoint.allCases, id: \.self) { joint in
-                        if let point = visiblePoint(sample, joint: joint) {
-                            Circle()
-                                .fill(.white)
-                                .frame(width: 7, height: 7)
-                                .overlay(Circle().stroke(Color.mint, lineWidth: 2))
-                                .shadow(radius: 1)
-                                .position(scaled(point, geo.size))
-                        }
-                    }
-                }
-            }
-        }
-        .allowsHitTesting(false)
-    }
-
-    private func visiblePoint(_ sample: MotionSample, joint: BodyJoint) -> MotionPoint? {
-        guard let point = sample.points[joint.rawValue],
-              point.confidence >= MovementEngine.minimumConfidence,
-              point.x.isFinite, point.y.isFinite,
-              point.x >= 0, point.x <= 1, point.y >= 0, point.y <= 1 else { return nil }
-        return point
-    }
-
-    private func scaled(_ p: MotionPoint, _ size: CGSize) -> CGPoint {
-        CGPoint(x: p.x * size.width, y: p.y * size.height)
-    }
+/// The views under the video: the kinematic panel, the 3D baby, the summary cards and what was noticed.
+enum ReviewTab: String {
+    case kinematics, pose3D, summary, noticed
 }
 
 struct MemoryDetailView: View {
     @EnvironmentObject private var store: LocalStore
-    @Environment(\.dismiss) private var dismiss
     let memoryID: UUID
     var initialStart: Double = 0
     var initialEnd: Double?
-    var autoOpenSkeleton: Bool = false
+
     var body: some View {
         Group {
             if let memory = store.memory(memoryID) {
-                MemoryContent(memoryID:memoryID,url:LocalFiles.url(memory.filename),initialStart:initialStart,initialEnd:initialEnd,autoOpenSkeleton:autoOpenSkeleton)
-            } else { ContentUnavailableView("Memory unavailable",systemImage:"video.slash") }
+                ReviewScreen(memory: memory, initialStart: initialStart, initialEnd: initialEnd)
+            } else {
+                ContentUnavailableView(tr("Memory unavailable"), systemImage: "video.slash")
+            }
         }
     }
 }
-private struct MemoryContent: View {
+
+private struct ReviewScreen: View {
     @EnvironmentObject private var store: LocalStore
     @Environment(\.dismiss) private var dismiss
 
     let memoryID: UUID
     let videoURL: URL
-    var initialStart: Double
-    var initialEnd: Double?
-    var autoOpenSkeleton: Bool
+    let initialStart: Double
+    let initialEnd: Double?
 
-    @StateObject private var playback: ClipPlayer
+    @StateObject private var player: ReviewPlayerModel
+    @State private var track: PoseTrack?
+    @State private var digest: ReviewDigest?
+    @State private var report: MotorReport?
+    @State private var filter: String?
     @State private var momentSeed: ClipSeed?
     @State private var editing = false
+    @State private var datePicking = false
+    @State private var exporting = false
     @State private var confirmDelete = false
-    @State private var skeletonSheet = false
-    @State private var autoSkeletonPresented = false
+    @State private var detail: MotorFinding?
+    @State private var showChecks = false
+    /// ⋯ → YOLO pose.
+    @State private var showYOLO = false
+    @AppStorage("reviewTab") private var tab: ReviewTab = .kinematics
+    @State private var confirmReanalyze = false
     @State private var workingSuggestion: UUID?
-    @State private var playbackSamples: [MotionSample] = []
-    @State private var showPlaybackSkeleton = true
-    @State private var videoAspect: CGFloat = 9.0 / 16.0
+    /// Display aspect for older memories without a stored one.
+    @State private var videoAspect: Double?
+    /// The scrubber's caption on the video (a reference, so the screen does not redraw while it changes).
+    @State private var scrubCaption = ScrubCaption()
 
-    init(memoryID:UUID,url:URL,initialStart:Double,initialEnd:Double?,autoOpenSkeleton:Bool) {
-        self.memoryID = memoryID
-        self.videoURL = url
+    init(memory: Memory, initialStart: Double, initialEnd: Double?) {
+        memoryID = memory.id
+        videoURL = LocalFiles.url(memory.filename)
         self.initialStart = initialStart
         self.initialEnd = initialEnd
-        self.autoOpenSkeleton = autoOpenSkeleton
-        _playback = StateObject(wrappedValue:ClipPlayer(url:url))
+        _player = StateObject(wrappedValue: ReviewPlayerModel(url: LocalFiles.url(memory.filename), duration: memory.duration))
     }
 
     private var memory: Memory? { store.memory(memoryID) }
+    private var poseReady: Bool { memory?.poseStorage != nil }
+    private var refining: Bool { memory?.analysisStage == .quick && store.analyzing.contains(memoryID) }
+
+    private struct LoadKey: Hashable {
+        var pose: String?
+        var stage: AnalysisStage?
+        var motor: Date?
+    }
 
     var body: some View {
-        screen
-    }
-
-    private var navigationScreen: some View {
-        content
-            .navigationTitle(memory?.title ?? "Memory")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { memoryToolbar }
-    }
-
-    private var modalScreen: some View {
-        navigationScreen
-            .sheet(item:$momentSeed) { seed in
-                if let m = memory { MomentEditor(memory:m,seed:seed) }
+        VStack(spacing: 0) {
+            videoArea
+            VideoScrubber(player: player, ticker: player.clock, events: memory.map { events($0) } ?? [], caption: scrubCaption)
+                .background(Color.black)
+            ScrollView {
+                if let m = memory {
+                    content(m)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: 720)
+                        .frame(maxWidth: .infinity)
+                }
             }
-            .sheet(isPresented:$editing) {
-                if let m = memory { MemoryEditor(memory:m) }
-            }
-            .sheet(isPresented:$skeletonSheet) {
-                skeletonSheetContent
-            }
-    }
-
-    private var screen: some View {
-        modalScreen
-            .confirmationDialog(
-                "Delete this video, summary and linked milestone clips?",
-                isPresented:$confirmDelete,
-                titleVisibility:.visible
-            ) {
-                Button("Delete memory",role:.destructive) { deleteMemory() }
-            }
-            .onAppear(perform:handleAppear)
-            .onChange(of:poseReady) { _,ready in handlePoseReady(ready) }
-            .task(id: poseReady) { await loadPlaybackResources() }
-            .onDisappear { playback.stop() }
-    }
-
-    private var poseReady: Bool { store.poseURL(for:memoryID) != nil }
-
-    @ViewBuilder private var content: some View {
-        ScrollView {
+        }
+        .background(Color.mgPaper)
+        .navigationTitle(memory?.displayTitle ?? tr("Memory"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { toolbar }
+        .sheet(item: $momentSeed) { seed in
+            if let m = memory { MomentEditor(memory: m, seed: seed) }
+        }
+        .sheet(isPresented: $editing) {
+            if let m = memory { MemoryEditor(memory: m) }
+        }
+        .sheet(isPresented: $datePicking) {
+            if let m = memory { VideoDateSheet(memory: m, baby: store.album.baby) }
+        }
+        .sheet(isPresented: $exporting) {
             if let m = memory {
-                memorySections(m)
-                    .padding()
+                ExportVideoSheet(memory: m, videoURL: videoURL, track: track, digest: digest, previewTime: player.time)
             }
         }
+        .sheet(item: $detail) { f in
+            ObservationDetailSheet(finding: f, rule: store.ruleBook?.rule(f.ruleID), sources: store.ruleBook?.sources ?? [:],
+                                   videoURL: videoURL, duration: player.duration) { start, end in player.playSegment(start, end) }
+        }
+        .sheet(isPresented: $showChecks) {
+            if let report { CheckListSheet(report: report, refining: refining) }
+        }
+        .fullScreenCover(isPresented: $showYOLO) {
+            if let m = memory { YOLOPoseView(memory: m).environmentObject(store) }
+        }
+        .confirmationDialog(tr("Delete this video, its analysis and linked milestones?"), isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button(tr("Delete memory"), role: .destructive) { deleteMemory() }
+        }
+        .confirmationDialog(tr("Analyse this video again with %@? Its current analysis is replaced.", PoseEngine.current.title),
+                            isPresented: $confirmReanalyze, titleVisibility: .visible) {
+            Button(tr("Analyse again")) {
+                player.pause()
+                store.reanalyze(memoryID)
+            }
+        }
+        .task(id: LoadKey(pose: memory?.poseStorage, stage: memory?.analysisStage, motor: memory?.motor?.generatedAt)) { await load() }
+        .onAppear {
+            if let initialEnd { player.playSegment(initialStart, initialEnd) }
+        }
+        .onDisappear { player.pause() }
+        .background { ResultsReadyFeedback(memoryID: memoryID, monitor: store.monitor) }
     }
 
-    @ViewBuilder private func memorySections(_ m: Memory) -> some View {
-        VStack(alignment:.leading,spacing:20) {
-            videoSection(m)
-            metadataSection(m)
-            saveMilestoneButton(m)
+    // MARK: video
 
+    private var videoArea: some View {
+        let aspect = CGFloat(memory?.aspectRatio ?? videoAspect ?? 9.0 / 16.0)
+        return ZStack {
+            PlayerLayerView(player: player.player)
+            PausedGlyph(player: player)
+        }
+        .overlay(alignment: .top) { ScrubCaptionView(caption: scrubCaption) }
+        .aspectRatio(aspect > 0.1 ? aspect : 9.0 / 16.0, contentMode: .fit)
+        .frame(maxWidth: .infinity)
+        .frame(maxHeight: 360)
+        .background(Color.black)
+        .contentShape(Rectangle())
+        .onTapGesture { player.toggle() }
+        .accessibilityElement(children: .contain)
+        .accessibilityHint(tr("Tap to play or pause"))
+    }
+
+    // MARK: content
+
+    @ViewBuilder private func content(_ m: Memory) -> some View {
+        let analysing = store.analyzing.contains(m.id)
+        VStack(alignment: .leading, spacing: 14) {
+            header(m)
+            if analysing {
+                // Big ring before any results; a slim bar while results are refined or redone.
+                AnalysisRingCard(memoryID: m.id, monitor: store.monitor, compact: digest != nil)
+            } else if m.report == nil || !poseReady {
+                retryCard(m)
+            }
+            let timelineEvents = events(m)
+            ReviewReadout(player: player, ticker: player.clock, digest: digest)
+            ReviewControls(player: player, fps: m.videoFPS ?? digest?.analysisFPS ?? 30) {
+                player.pause()
+                momentSeed = ClipSeed(start: min(player.time, max(0, m.duration - 1)), end: min(m.duration, player.time + 5), title: "")
+            }
+            Picker(tr("View"), selection: $tab) {
+                Text(tr("Kinematics")).tag(ReviewTab.kinematics)
+                Text(tr("3D")).tag(ReviewTab.pose3D)
+                Text(tr("Summary")).tag(ReviewTab.summary)
+                Text(noticedTitle).tag(ReviewTab.noticed)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            switch tab {
+            case .kinematics:
+                if digest != nil {
+                    ParameterTimeline(player: player, digest: digest, events: timelineEvents)
+                        .mgCard(padding: 12)
+                } else {
+                    placeholder(analysing)
+                }
+            case .pose3D:
+                Pose3DPanel(memory: m, player: player)
+            case .summary:
+                if let digest {
+                    BodyMapCard(digest: digest)
+                    ReviewCard(title: tr("Activity map")) {
+                        ReviewTimeline(player: player, ticker: player.clock, digest: digest, events: timelineEvents)
+                    }
+                    BalanceCard(digest: digest)
+                    MotionCard(digest: digest, duration: m.duration, player: player)
+                    RangeCard(digest: digest)
+                } else {
+                    placeholder(analysing)
+                }
+            case .noticed:
+                EventNavigator(player: player, ticker: player.clock, events: timelineEvents, groups: groups(m), filter: $filter)
+                if let report {
+                    ObservationTiles(report: report, refining: refining, onSelect: { f in
+                        if let e = f.events.min(by: { $0.t0 < $1.t0 }) { player.seek(e.t0) }
+                        player.pause()
+                        detail = f
+                    }, onShowList: { showChecks = true })
+                } else {
+                    placeholder(analysing)
+                }
+                suggestions(m)
+            }
+            moments(m)
             if !m.note.isEmpty {
-                Text(m.note).font(.subheadline)
+                Text(m.note).font(.footnote).foregroundStyle(.secondary)
             }
-
-            analysisSection(m)
-            momentsSection(m)
         }
     }
 
-    @ViewBuilder private func videoSection(_ m: Memory) -> some View {
-        ZStack {
-            VideoPlayer(player:playback.player)
-            if showPlaybackSkeleton, !playbackSamples.isEmpty {
-                PlaybackSkeletonOverlay(sample: currentPlaybackSample)
-            }
-        }
-        // Match the video's displayed orientation rather than forcing a 3:4 box.
-        // Because the player and overlay share this exact aspect rectangle, the
-        // normalized pose coordinates land on the same pixels as the source video.
-        .aspectRatio(videoAspect,contentMode:.fit)
-        .frame(maxWidth:.infinity)
-        .frame(maxHeight:370)
-        .background(.black)
-        .clipShape(RoundedRectangle(cornerRadius:18))
+    /// "Noticed" with how many observations are shown.
+    private var noticedTitle: String {
+        let n = report?.shown.count ?? 0
+        return n > 0 ? "\(tr("Noticed")) \(n)" : tr("Noticed")
+    }
 
-        HStack {
-            Text(m.date.formatted(date:.abbreviated,time:.shortened))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+    private func placeholder(_ analysing: Bool) -> some View {
+        Text(analysing ? tr("Appears when the analysis is done.") : tr("No results for this video yet."))
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .mgCard(padding: 14)
+    }
+
+    private func header(_ m: Memory) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Button { datePicking = true } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    if m.needsDate {
+                        Text(tr("Add filming date"))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.mgGold)
+                    } else {
+                        Text(m.dateText).font(.subheadline.weight(.semibold)).foregroundStyle(Color.mgInk)
+                    }
+                    if let age = m.ageText(store.album.baby) {
+                        Text(age).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(tr("Change when this was filmed"))
             Spacer()
-            if !playbackSamples.isEmpty {
-                Button {
-                    showPlaybackSkeleton.toggle()
-                } label: {
-                    Label(
-                        showPlaybackSkeleton ? "Hide skeleton" : "Show skeleton",
-                        systemImage: showPlaybackSkeleton ? "figure.child" : "figure.child.circle"
-                    )
+            Menu {
+                Picker(tr("Position"), selection: Binding(get: { m.context }, set: { store.setContext($0, for: m.id) })) {
+                    ForEach(RecordingContext.allCases) { c in Text(c.title).tag(c) }
                 }
-                .font(.caption)
+            } label: {
+                Text(m.context.title)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                    .padding(.horizontal, 10)
+                    .frame(minHeight: 30)
+                    .background(Color.mgSageSoft, in: Capsule())
+                    .foregroundStyle(Color.mgSage)
             }
-            if playback.playingClip {
-                Button("Full video") { playback.play(start:0,end:nil) }
-                    .font(.caption)
+            .accessibilityLabel(tr("Baby’s position: %@", m.context.title))
+            if let digest {
+                StatRing(value: digest.trackedFraction, label: "\(Int((digest.trackedFraction * 100).rounded()))")
+                    .accessibilityLabel(tr("Tracked %@ of the time", L10n.percent(digest.trackedFraction)))
             }
         }
     }
 
-    @ViewBuilder private func metadataSection(_ m: Memory) -> some View {
-        if let baby = store.album.baby {
-            Text(baby.age(on:m.date))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+    private func retryCard(_ m: Memory) -> some View {
+        HStack(spacing: 12) {
+            Text(m.analysisError == nil ? tr("Not analysed yet") : tr("Analysis didn’t finish")).font(.subheadline.weight(.semibold))
+            Spacer()
+            Button(tr("Retry")) { store.analyze(m.id) }
+                .buttonStyle(.borderedProminent).tint(Color.mgSage)
         }
+        .mgCard(padding: 12)
+    }
 
-        if let estimator = m.poseEstimator {
-            let isYOLO = estimator.contains("yolo26")
-            HStack(spacing:6) {
-                Image(systemName:isYOLO ? "cpu" : "exclamationmark.triangle")
-                Text(isYOLO ? "YOLO26l Pose · on-device Core ML" : "Apple Vision fallback")
-                if let processing = m.poseProcessing, processing != "none" {
-                    Text("· \(processing)")
-                }
+    // MARK: events
+
+    private func events(_ m: Memory) -> [TimelineEvent] {
+        var out: [TimelineEvent] = []
+        for f in report?.shown ?? [] {
+            for (k, e) in f.events.enumerated() {
+                out.append(TimelineEvent(id: "\(f.ruleID)#\(k)", group: f.ruleID, t0: e.t0, t1: e.t1, tint: f.tint, title: f.name.text))
             }
-            .font(.caption2)
-            .foregroundStyle(isYOLO ? Color.secondary : Color.orange)
         }
+        for s in (m.milestoneSuggestions ?? []) where s.status == .suggested {
+            out.append(TimelineEvent(id: "s-\(s.id)", group: "milestones", t0: s.start, t1: s.end, tint: .milestone, title: s.title))
+        }
+        for moment in store.album.moments where moment.memoryID == m.id {
+            out.append(TimelineEvent(id: "m-\(moment.id)", group: "milestones", t0: moment.start, t1: moment.end, tint: .milestone,
+                                     title: moment.title.isEmpty ? tr("Milestones") : moment.title))
+        }
+        return out.sorted { $0.t0 < $1.t0 }
     }
 
-    private func saveMilestoneButton(_ m: Memory) -> some View {
-        Button {
-            playback.stop()
-            momentSeed = ClipSeed(
-                start:min(playback.position,max(0,m.duration-1)),
-                end:min(m.duration,playback.position+5),
-                title:""
-            )
-        } label: {
-            Label("Save a milestone clip",systemImage:"sparkle")
-        }
-        .buttonStyle(.bordered)
+    private func groups(_ m: Memory) -> [EventGroup] {
+        var out = (report?.shown ?? []).filter { !$0.events.isEmpty }.map { EventGroup(id: $0.ruleID, title: $0.name.text, tint: $0.tint) }
+        let hasMilestones = (m.milestoneSuggestions ?? []).contains { $0.status == .suggested } || store.album.moments.contains { $0.memoryID == m.id }
+        if hasMilestones { out.append(EventGroup(id: "milestones", title: tr("Milestones"), tint: .milestone)) }
+        return out
     }
 
-    @ViewBuilder private func analysisSection(_ m: Memory) -> some View {
-        if let report = m.report {
-            reportView(report,memory:m)
-            suggestionSection(m)
-            skeletonButton(m)
-        } else if store.analyzing.contains(m.id) {
-            ProgressView("Preparing movement summary on this device…")
-            Text("Your video is already saved. You can return to the album.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        } else {
-            Text(m.analysisError ?? "Your video is saved.")
-                .font(.subheadline)
-            Button("Retry summary") { store.analyze(m.id) }
-        }
-    }
+    // MARK: milestones
 
-    @ViewBuilder private func suggestionSection(_ m: Memory) -> some View {
+    @ViewBuilder private func suggestions(_ m: Memory) -> some View {
         let pending = (m.milestoneSuggestions ?? []).filter { $0.status == .suggested }
         if !pending.isEmpty {
-            milestoneSuggestionsView(pending,memory:m)
+            ReviewCard(title: tr("Possible milestones")) {
+                ForEach(pending) { s in
+                    HStack(spacing: 8) {
+                        Button { player.playSegment(s.start, s.end) } label: {
+                            Text(s.title).font(.subheadline.weight(.semibold)).lineLimit(2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(tr("Plays this part of the video"))
+                        Button {
+                            player.pause()
+                            workingSuggestion = s.id
+                            Task {
+                                do { try await store.confirmSuggestion(memoryID: m.id, suggestionID: s.id) }
+                                catch { store.error = error.localizedDescription }
+                                workingSuggestion = nil
+                            }
+                        } label: {
+                            if workingSuggestion == s.id { ProgressView().controlSize(.small) }
+                            else { Text(tr("Add")).font(.subheadline.weight(.semibold)) }
+                        }
+                        .buttonStyle(.borderedProminent).tint(Color.mgSage)
+                        .disabled(workingSuggestion != nil)
+                        .accessibilityLabel(tr("Add “%@” to Growth", s.title))
+                        Button {
+                            do { try store.dismissSuggestion(memoryID: m.id, suggestionID: s.id) }
+                            catch { store.error = error.localizedDescription }
+                        } label: { Text(tr("Not this")).font(.subheadline.weight(.semibold)) }
+                        .buttonStyle(.bordered)
+                        .disabled(workingSuggestion != nil)
+                        .accessibilityLabel(tr("Not this movement"))
+                    }
+                }
+            }
         }
     }
 
-    @ViewBuilder private func skeletonButton(_ m: Memory) -> some View {
-        if store.poseURL(for:m.id) != nil {
+    @ViewBuilder private func moments(_ m: Memory) -> some View {
+        let saved = store.album.moments.filter { $0.memoryID == m.id }.sorted { $0.start < $1.start }
+        if !saved.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(saved) { moment in
+                        Button { player.playSegment(moment.start, moment.end) } label: {
+                            Text(moment.title)
+                                .font(.caption.weight(.semibold))
+                                .padding(.horizontal, 12).padding(.vertical, 7)
+                                .background(Color.mgGold.opacity(0.15), in: Capsule())
+                                .foregroundStyle(Color.mgInk)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: toolbar
+
+    @ToolbarContentBuilder private var toolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
-                playback.stop()
-                skeletonSheet = true
+                player.pause()
+                exporting = true
             } label: {
-                Label("Make a 10s skeleton clip",systemImage:"figure.child")
-                    .frame(maxWidth:.infinity)
+                Image(systemName: "square.and.arrow.up")
             }
-            .buttonStyle(.borderedProminent)
+            .accessibilityLabel(tr("Export video"))
         }
-    }
-
-    @ViewBuilder private func momentsSection(_ m: Memory) -> some View {
-        let moments = store.album.moments
-            .filter { $0.memoryID == m.id }
-            .sorted { $0.start < $1.start }
-
-        if !moments.isEmpty {
-            Text("Milestones in this memory").font(.headline)
-            ForEach(moments) { moment in
-                Button { playback.play(start:moment.start,end:moment.end) } label: {
-                    Label(
-                        "\(moment.title) · \(clock(moment.start))–\(clock(moment.end))",
-                        systemImage:"play.circle"
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    @ToolbarContentBuilder private var memoryToolbar: some ToolbarContent {
-        ToolbarItem(placement:.topBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Menu {
-                Button("Edit title & note",systemImage:"pencil") { editing = true }
-                if let m = memory { exportMenu(m) }
-                Button("Delete memory",systemImage:"trash",role:.destructive) { confirmDelete = true }
-            } label: {
-                Image(systemName:"ellipsis.circle")
-            }
-            .accessibilityLabel("Memory options")
-        }
-    }
-
-    @ViewBuilder private func exportMenu(_ m: Memory) -> some View {
-        ShareLink(item:LocalFiles.url(m.filename)) {
-            Label("Export video",systemImage:"square.and.arrow.up")
-        }
-
-        if let poseURL = store.poseURL(for:m.id) {
-            ShareLink(item:poseURL) {
-                Label("Export processed pose JSON",systemImage:"square.and.arrow.up")
-            }
-            if let rawPoseURL = store.rawPoseURL(for:m.id) {
-                ShareLink(item:rawPoseURL) {
-                    Label("Export raw YOLO pose JSON",systemImage:"square.and.arrow.up")
+                Button(tr("Edit title & note")) { editing = true }
+                Button(tr("Change date")) { datePicking = true }
+                if poseReady {
+                    Button(tr("YOLO pose")) {
+                        player.pause()
+                        showYOLO = true
+                    }
                 }
+                if poseReady {
+                    Button(tr("Analyse again")) { confirmReanalyze = true }
+                        .disabled(!store.canReanalyze(memoryID))
+                }
+                if let m = memory {
+                    Section(tr("Files")) {
+                        ShareLink(item: LocalFiles.url(m.filename)) { Text(tr("Original video")) }
+                        if poseReady {
+                            ShareLink(item: PoseJSONExport(memoryID: m.id, raw: false), preview: SharePreview(tr("Pose data (JSON)"))) {
+                                Text(tr("Pose data (JSON)"))
+                            }
+                            ShareLink(item: PoseJSONExport(memoryID: m.id, raw: true), preview: SharePreview(tr("Raw pose data (JSON)"))) {
+                                Text(tr("Raw pose data (JSON)"))
+                            }
+                            if PoseEngine.isInstantHMR(m.poseEstimator) {
+                                ShareLink(item: HMRJSONExport(memoryID: m.id), preview: SharePreview(tr("3D pose data (JSON)"))) {
+                                    Text(tr("3D pose data (JSON)"))
+                                }
+                            }
+                        }
+                    }
+                }
+                Button(tr("Delete memory"), role: .destructive) { confirmDelete = true }
+            } label: {
+                Image(systemName: "ellipsis.circle")
             }
-            Button("Create skeleton clip",systemImage:"figure.child") {
-                playback.stop()
-                skeletonSheet = true
-            }
-        }
-
-        if let report = m.report {
-            ShareLink(item:reportText(report,memory:m)) {
-                Label("Share summary",systemImage:"doc.text")
-            }
+            .accessibilityLabel(tr("Memory options"))
         }
     }
 
-    @ViewBuilder private var skeletonSheetContent: some View {
-        if let m = memory, let poseURL = store.poseURL(for:m.id) {
-            SkeletonClipSheet(
-                memory:m,
-                videoURL:LocalFiles.url(m.filename),
-                poseURL:poseURL
-            )
+    // MARK: loading
+
+    @MainActor private func load() async {
+        if memory?.aspectRatio == nil, videoAspect == nil, let info = try? await VideoAnalyzer.probe(url: videoURL) {
+            videoAspect = info.aspect
         }
-    }
-
-
-    private var currentPlaybackSample: MotionSample? {
-        nearestSample(to: playback.position)
-    }
-
-    private func nearestSample(to time: Double) -> MotionSample? {
-        guard !playbackSamples.isEmpty, time.isFinite else { return nil }
-        var low = 0
-        var high = playbackSamples.count - 1
-        while low < high {
-            let mid = (low + high) / 2
-            if playbackSamples[mid].time < time { low = mid + 1 }
-            else { high = mid }
-        }
-
-        let right = low
-        let left = max(0, right - 1)
-        let candidate: MotionSample
-        if abs(playbackSamples[left].time - time) <= abs(playbackSamples[right].time - time) {
-            candidate = playbackSamples[left]
-        } else {
-            candidate = playbackSamples[right]
-        }
-        // Do not freeze an old pose over a long detector gap.
-        return abs(candidate.time - time) <= 0.20 ? candidate : nil
-    }
-
-    @MainActor private func loadPlaybackResources() async {
-        let sourceURL = videoURL
-        if let tracks = try? await AVURLAsset(url: sourceURL).loadTracks(withMediaType: .video),
-           let track = tracks.first,
-           let naturalSize = try? await track.load(.naturalSize),
-           let transform = try? await track.load(.preferredTransform) {
-            let bounds = CGRect(origin: .zero, size: naturalSize).applying(transform)
-            let width = abs(bounds.width)
-            let height = abs(bounds.height)
-            if width > 1, height > 1 {
-                videoAspect = width / height
-            }
-        }
-
-        guard let poseURL = store.poseURL(for: memoryID) else {
-            playbackSamples = []
+        guard poseReady else {
+            track = nil; digest = nil; report = nil
             return
         }
-
-        do {
-            playbackSamples = try await Task.detached(priority: .utility) {
-                let data = try Data(contentsOf: poseURL)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                if let archive = try? decoder.decode(PoseArchive.self, from: data) {
-                    return archive.frames.sorted { $0.time < $1.time }
-                }
-                return try JSONDecoder().decode([MotionSample].self, from: data).sorted { $0.time < $1.time }
-            }.value
-        } catch {
-            playbackSamples = []
+        let t = await store.poseTrack(for: memoryID)
+        let d = await store.reviewDigest(for: memoryID)
+        let r = await store.motorReport(for: memoryID)
+        withAnimation(.easeOut(duration: 0.25)) {
+            track = t
+            digest = d
+            report = r
         }
     }
 
     private func deleteMemory() {
-        playback.stop()
+        player.pause()
         do {
             try store.deleteMemory(memoryID)
             dismiss()
@@ -461,146 +464,98 @@ private struct MemoryContent: View {
             store.error = error.localizedDescription
         }
     }
+}
 
-    private func handleAppear() {
-        if initialEnd != nil {
-            playback.play(start:initialStart,end:initialEnd)
-        }
-        if autoOpenSkeleton, !autoSkeletonPresented, poseReady {
-            autoSkeletonPresented = true
-            skeletonSheet = true
-        }
+/// Big play glyph while paused (review screen and YOLO pose page).
+struct PausedGlyph: View {
+    @ObservedObject var player: ReviewPlayerModel
+    var body: some View {
+        Image(systemName: "play.fill")
+            .font(.system(size: 30, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 64, height: 64)
+            .mgGlass(Circle())
+            .opacity(player.isPlaying ? 0 : 0.9)
+            .scaleEffect(player.isPlaying ? 0.8 : 1)
+            .animation(.easeOut(duration: 0.2), value: player.isPlaying)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
+}
 
-    private func handlePoseReady(_ ready: Bool) {
-        if ready && autoOpenSkeleton && !autoSkeletonPresented {
-            playback.stop()
-            autoSkeletonPresented = true
-            skeletonSheet = true
-        }
-    }
+/// This video's analysis progress: a ring before the first results, a slim bar (`compact`) while
+/// results are refined or the video is analysed again.
+private struct AnalysisRingCard: View {
+    let memoryID: UUID
+    @ObservedObject var monitor: AnalysisMonitor
+    var compact = false
 
-    @ViewBuilder private func milestoneSuggestionsView(_ suggestions:[MilestoneSuggestion],memory:Memory) -> some View {
-        VStack(alignment:.leading,spacing:12) {
-            HStack {
-                Label("Possible milestones",systemImage:"sparkles").font(.headline)
-                Spacer()
-                Text("Review first").font(.caption).foregroundStyle(.secondary)
-            }
-            Text("These are movement-pattern suggestions from on-device pose analysis, not developmental conclusions.")
-                .font(.caption).foregroundStyle(.secondary)
-            ForEach(suggestions) { suggestion in
-                VStack(alignment:.leading,spacing:9) {
-                    Button {
-                        playback.play(start:suggestion.start,end:suggestion.end)
-                    } label: {
-                        HStack {
-                            Image(systemName:suggestion.kind.symbol).frame(width:28)
-                            VStack(alignment:.leading,spacing:2) {
-                                Text(suggestion.title).font(.subheadline.weight(.semibold))
-                                Text("Preview \(clock(suggestion.start))–\(clock(suggestion.end)) · \(matchLabel(suggestion.score))")
-                                    .font(.caption).foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName:"play.circle")
-                        }
-                    }.buttonStyle(.plain)
-
-                    HStack {
-                        Button {
-                            playback.stop()
-                            workingSuggestion = suggestion.id
-                            Task {
-                                do { try await store.confirmSuggestion(memoryID:memory.id,suggestionID:suggestion.id) }
-                                catch { store.error = error.localizedDescription }
-                                workingSuggestion = nil
-                            }
-                        } label: {
-                            if workingSuggestion == suggestion.id { ProgressView().controlSize(.small) }
-                            else { Label("Add to Growth",systemImage:"bookmark.fill") }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(workingSuggestion != nil)
-
-                        Button("Not this movement") {
-                            do { try store.dismissSuggestion(memoryID:memory.id,suggestionID:suggestion.id) }
-                            catch { store.error = error.localizedDescription }
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(workingSuggestion != nil)
-                    }
-                    .font(.caption)
+    var body: some View {
+        let p = monitor.progress[memoryID]
+        let f = p?.fraction ?? 0
+        let percent = L10n.percent((f * 100).rounded(.down) / 100)
+        let spoken: String = p?.paused == true ? tr("%@, paused", percent)
+            : (p?.remainingSeconds.flatMap(AnalysisProgress.eta).map { tr("%1$@, %2$@ left", percent, $0) } ?? percent)
+        if compact {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(p?.title ?? tr("Analysing")).font(.subheadline.weight(.semibold)).foregroundStyle(Color.mgInk)
+                    Spacer()
+                    Text(p?.paused == true ? tr("Paused") : [percent, p?.etaText].compactMap { $0 }.joined(separator: " · "))
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
                 }
-                .padding(12)
-                .background(.teal.opacity(0.07))
-                .clipShape(RoundedRectangle(cornerRadius:14))
+                ProgressView(value: max(0, min(1, f)))
+                    .tint(Color.mgSage)
+                    .animation(.easeOut(duration: 0.3), value: f)
             }
+            .mgCard(padding: 12)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(p?.title ?? tr("Analysing"))
+            .accessibilityValue(spoken)
+        } else {
+            ring(p: p, f: f, spoken: spoken)
         }
     }
 
-    private func matchLabel(_ score: Double) -> String {
-        score >= 0.84 ? "strong pattern match" : "possible pattern match"
-    }
-
-    @ViewBuilder private func reportView(_ r:MovementReport,memory:Memory) -> some View {
-        VStack(alignment:.leading,spacing:10) {
-            Text("Movement summary").font(.headline)
-            Text(r.summary).font(.subheadline)
-            Label(r.qualityNote,systemImage:"viewfinder").font(.caption).foregroundStyle(.secondary)
-        }
-        if !r.events.isEmpty {
-            DisclosureGroup("Movement clips · \(r.events.count)") {
-                ForEach(r.events) { event in
-                    HStack {
-                        Button {playback.play(start:event.start,end:event.end)} label: {
-                            VStack(alignment:.leading,spacing:4) {
-                                Label(event.title,systemImage:"play.circle")
-                                Text("\(clock(event.start))–\(clock(event.end))").font(.caption).foregroundStyle(.secondary)
-                            }
-                        }.buttonStyle(.plain)
-                        Spacer()
-                        Button {
-                            playback.stop()
-                            momentSeed = ClipSeed(start:event.start,end:event.end,title:"")
-                        } label: {
-                            Image(systemName:"bookmark")
-                        }
-                        .accessibilityLabel("Save \(event.title) as milestone")
-                        .frame(minWidth:44,minHeight:44)
-                    }
-                    .padding(.vertical,6)
+    private func ring(p: AnalysisProgress?, f: Double, spoken: String) -> some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle().stroke(Color.mgSage.opacity(0.15), lineWidth: 8)
+                Circle().trim(from: 0, to: max(0.01, min(1, f)))
+                    .stroke(Color.mgSage, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(.easeOut(duration: 0.3), value: f)
+                Text(L10n.percent((f * 100).rounded(.down) / 100))
+                    .font(.headline.monospacedDigit())
+                    .foregroundStyle(Color.mgInk)
+                    .contentTransition(.numericText())
+            }
+            .frame(width: 72, height: 72)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tr("Analysing")).font(.subheadline.weight(.semibold)).foregroundStyle(Color.mgInk)
+                if let p, p.paused {
+                    Text(tr("Paused")).font(.subheadline).foregroundStyle(.secondary)
+                } else if let eta = p?.remainingSeconds.flatMap(AnalysisProgress.eta) {
+                    Text(tr("%@ left", eta)).font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
                 }
             }
+            Spacer()
         }
-        DisclosureGroup("Recording details") {
-            VStack(alignment:.leading,spacing:12) {
-                Text("Whole-body landmarks visible: \(clock(r.fullBodySeconds)) of \(clock(r.duration))").font(.caption)
-                ForEach(r.limbs) { limb in
-                    VStack(alignment:.leading,spacing:4) {
-                        HStack {
-                            Text(limb.name)
-                            Spacer()
-                            Text("\(clock(limb.observedSeconds)) observed").foregroundStyle(.secondary)
-                        }
-                        if let fraction = limb.activeFraction {
-                            ProgressView(value:min(1,max(0,fraction)))
-                            Text("Movement detected in \(Int(fraction*100))% of observed time").font(.caption)
-                        } else {
-                            Text("Not enough clear data").font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-                    .font(.subheadline)
-                }
-                Text("Estimates from 2D landmarks. Visibility, lighting and camera motion affect results. These are observations, not developmental scores.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.top,10)
-        }
+        .mgCard(padding: 14)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(tr("Analysing"))
+        .accessibilityValue(spoken)
     }
+}
 
-    private func reportText(_ r:MovementReport,memory:Memory) -> String {
-        "MoveGrow — \(memory.title)\n\(memory.date.formatted(date:.abbreviated,time:.shortened))\n\n\(r.summary)\n\n\(r.qualityNote)\n\n" + r.limbs.map {"\($0.name): \(clock($0.observedSeconds)) observed; \(clock($0.activeSeconds)) movement detected."}.joined(separator:"\n") + "\n\nDescriptive observations only; not a developmental screening or diagnosis."
+/// A gentle haptic when this memory's results arrive while the parent is looking at it.
+private struct ResultsReadyFeedback: View {
+    let memoryID: UUID
+    @ObservedObject var monitor: AnalysisMonitor
+    var body: some View {
+        Color.clear
+            .sensoryFeedback(.success, trigger: monitor.finished) { _, new in new?.id == memoryID }
     }
 }
 
@@ -608,19 +563,41 @@ struct MemoryEditor: View {
     @EnvironmentObject private var store:LocalStore
     @Environment(\.dismiss) private var dismiss
     @State var memory:Memory
+    @State private var datePicking = false
     var body:some View {
         NavigationStack {
-            Form {TextField("Title",text:$memory.title);TextField("Notes",text:$memory.note,axis:.vertical)}
-                .navigationTitle("Edit memory").toolbar {
-                    ToolbarItem(placement:.cancellationAction) {Button("Cancel"){dismiss()}}
-                    ToolbarItem(placement:.confirmationAction) {Button("Save"){
-                        do {
-                            // Merge only edited fields; preserve a report completed meanwhile.
-                            if var latest = store.memory(memory.id) {latest.title = memory.title;latest.note = memory.note;try store.update(latest)}
-                            dismiss()
-                        } catch {store.error = error.localizedDescription}
-                    }.disabled(memory.title.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)}
+            Form {
+                Section(tr("Title")) {TextField(tr("A little moment"),text:$memory.title)}
+                Section(tr("Notes")) {TextField(tr("Add a note (optional)"),text:$memory.note,axis:.vertical)}
+                Section(tr("Filmed")) {
+                    let current = store.memory(memory.id) ?? memory
+                    Button {datePicking = true} label: {
+                        HStack {
+                            Text(current.needsDate ? tr("Add filming date") : current.dateText)
+                                .foregroundStyle(current.needsDate ? Color.mgGold : Color.mgInk)
+                            Spacer()
+                            if let age = current.ageText(store.album.baby) {Text(age).font(.footnote).foregroundStyle(.secondary)}
+                        }
+                    }
                 }
+            }
+            .sheet(isPresented:$datePicking) {VideoDateSheet(memory:store.memory(memory.id) ?? memory, baby:store.album.baby)}
+            // A video without a title of its own shows the placeholder, in the app's language.
+            .onAppear {if !memory.hasOwnTitle {memory.title = ""}}
+            .navigationTitle(tr("Edit memory")).toolbar {
+                ToolbarItem(placement:.cancellationAction) {Button(tr("Cancel")){dismiss()}}
+                ToolbarItem(placement:.confirmationAction) {Button(tr("Save")){
+                    do {
+                        // Merge only edited fields; preserve a report completed meanwhile.
+                        if var latest = store.memory(memory.id) {
+                            latest.title = memory.title.trimmingCharacters(in:.whitespacesAndNewlines)
+                            latest.note = memory.note
+                            try store.update(latest)
+                        }
+                        dismiss()
+                    } catch {store.error = error.localizedDescription}
+                }}
+            }
         }
     }
 }

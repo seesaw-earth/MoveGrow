@@ -11,13 +11,16 @@
       "band": "fast",
       "name": {
         "zh": "快速、细小的节律性抖动",
-        "en": "Fast, fine rhythmic shaking"
+        "en": "Fast, fine rhythmic shaking",
+        "es": "Temblor rítmico rápido y fino"
       },
       "requires": {
         "min_fps": 24,
         "series": "raw",
         "context_exclude": [
-          "held"
+          "held",
+          "standing",
+          "walking"
         ],
         "joints": [
           "leftShoulder",
@@ -118,15 +121,18 @@
       "severity": "note",
       "message": {
         "zh": "{t0:.0f}–{t1:.0f} 秒：{limbs_zh}出现约 {hz:.1f} Hz 的细小节律性抖动，持续约 {dur:.1f} 秒（{laterality_zh}）。",
-        "en": "{t0:.0f}–{t1:.0f} s: fine rhythmic shaking of the {limbs_en} at about {hz:.1f} Hz for {dur:.1f} s ({laterality_en})."
+        "en": "{t0:.0f}–{t1:.0f} s: fine rhythmic shaking of the {limbs_en} at about {hz:.1f} Hz for {dur:.1f} s ({laterality_en}).",
+        "es": "{t0:.0f}–{t1:.0f} s: temblor rítmico fino en {limbs_es} a unos {hz:.1f} Hz durante {dur:.1f} s ({laterality_es})."
       },
       "explain": {
         "zh": "这与文献对新生儿细震颤 / jitteriness 的描述相符：频率高于 6 Hz、幅度小于约 3 cm，常见于健康新生儿，常两侧对称。区分它与抽搐的关键是：轻柔握住肢体时是否停止。",
-        "en": "This matches published descriptions of newborn fine tremor or jitteriness: faster than 6 Hz and smaller than about 3 cm, common in healthy newborns and often on both sides. The key difference from a seizure is whether it stops when the limb is gently held."
+        "en": "This matches published descriptions of newborn fine tremor or jitteriness: faster than 6 Hz and smaller than about 3 cm, common in healthy newborns and often on both sides. The key difference from a seizure is whether it stops when the limb is gently held.",
+        "es": "Coincide con lo publicado sobre el temblor fino del recién nacido (en inglés, jitteriness): de más de 6 Hz y de menos de unos 3 cm de amplitud, frecuente en recién nacidos sanos y a menudo en ambos lados. La diferencia clave con una convulsión es si se detiene al sujetar suavemente la extremidad."
       },
       "followup": {
         "zh": "下次出现时，请轻柔握住那只手或脚。停下来通常说明是良性抖动；如果握住也不停、伴随眼神凝视或面色/呼吸变化，请及时就医，并把这段视频给医生看。",
-        "en": "Next time it happens, gently hold that hand or foot. If it stops, it is usually benign jitteriness. If it keeps going while held, or comes with staring or a change in colour or breathing, seek medical care and show this video."
+        "en": "Next time it happens, gently hold that hand or foot. If it stops, it is usually benign jitteriness. If it keeps going while held, or comes with staring or a change in colour or breathing, seek medical care and show this video.",
+        "es": "La próxima vez que ocurra, sujeta suavemente esa mano o ese pie. Si se detiene, suele tratarse de un temblor benigno. Si continúa mientras lo sujetas, o se acompaña de mirada fija o de cambios de color o en la respiración, busca atención médica y muestra este video."
       },
       "sources": [
         "S01",
@@ -143,13 +149,16 @@
       "band": "fast",
       "name": {
         "zh": "较粗大的节律性抖动",
-        "en": "Coarse rhythmic shaking"
+        "en": "Coarse rhythmic shaking",
+        "es": "Temblor rítmico grueso"
       },
       "requires": {
         "min_fps": 24,
         "series": "raw",
         "context_exclude": [
-          "held"
+          "held",
+          "standing",
+          "walking"
         ],
         "joints": [
           "leftShoulder",
@@ -260,15 +269,18 @@
       "severity": "discuss",
       "message": {
         "zh": "{t0:.0f}–{t1:.0f} 秒：{limbs_zh}出现约 {hz:.1f} Hz、幅度约 {p2p_cm:.1f} cm 的较粗大节律性抖动，持续约 {dur:.1f} 秒。",
-        "en": "{t0:.0f}–{t1:.0f} s: coarse rhythmic shaking of the {limbs_en} at about {hz:.1f} Hz, ~{p2p_cm:.1f} cm, for {dur:.1f} s."
+        "en": "{t0:.0f}–{t1:.0f} s: coarse rhythmic shaking of the {limbs_en} at about {hz:.1f} Hz, ~{p2p_cm:.1f} cm, for {dur:.1f} s.",
+        "es": "{t0:.0f}–{t1:.0f} s: temblor rítmico grueso en {limbs_es} a unos {hz:.1f} Hz, de ~{p2p_cm:.1f} cm, durante {dur:.1f} s."
       },
       "explain": {
-        "zh": "文献把频率较低、幅度较大的震颤称为粗震颤；与细震颤相比，它和安抚后仍不缓解的抖动一样，更值得让医生看看。幅度换算成厘米依赖身长先验，只是粗略估计。",
-        "en": "Lower-frequency, larger-amplitude shaking is described as coarse tremor. Like shaking that does not settle with soothing, it is worth showing to a doctor. The size in centimetres relies on a body-size assumption and is only approximate."
+        "zh": "文献把频率较低、幅度较大的震颤称为粗震颤；与细震颤相比，它和安抚后仍不缓解的抖动一样，更值得让医生看看。换算成厘米的幅度是根据宝宝体型推算的，只是粗略估计。",
+        "en": "Lower-frequency, larger-amplitude shaking is described as coarse tremor. Like shaking that does not settle with soothing, it is worth showing to a doctor. The size in centimetres relies on a body-size assumption and is only approximate.",
+        "es": "Un temblor de menor frecuencia y mayor amplitud se describe como temblor grueso. Al igual que un temblor que no cede al calmar al bebé, conviene mostrárselo a un médico. El tamaño en centímetros se basa en una suposición sobre el tamaño del cuerpo y es solo aproximado."
       },
       "followup": {
         "zh": "请试着轻柔握住肢体或安抚宝宝，看是否停止；把这段视频带给儿科医生。若握住也不停或伴随凝视、面色/呼吸变化，请及时就医。",
-        "en": "Try gently holding the limb or soothing your baby to see whether it stops, and bring this video to your paediatrician. If it continues while held, or comes with staring or a change in colour or breathing, seek medical care."
+        "en": "Try gently holding the limb or soothing your baby to see whether it stops, and bring this video to your paediatrician. If it continues while held, or comes with staring or a change in colour or breathing, seek medical care.",
+        "es": "Intenta sujetar suavemente la extremidad o calmar a tu bebé para ver si se detiene, y muéstrale este video a tu pediatra. Si continúa mientras la sujetas, o se acompaña de mirada fija o de cambios de color o en la respiración, busca atención médica."
       },
       "sources": [
         "S01",
@@ -285,13 +297,16 @@
       "aggregate": true,
       "name": {
         "zh": "节律性踢腿 / 挥手",
-        "en": "Rhythmic kicking / waving bouts"
+        "en": "Rhythmic kicking / waving bouts",
+        "es": "Pataleo o movimientos rítmicos de brazos"
       },
       "requires": {
         "min_fps": 24,
         "series": "raw",
         "context_exclude": [
-          "held"
+          "held",
+          "standing",
+          "walking"
         ],
         "joints": [
           "leftShoulder",
@@ -375,11 +390,13 @@
       "severity": "info",
       "message": {
         "zh": "本次有 {n} 段节律性动作（共约 {total_s:.0f} 秒，典型频率 {hz:.1f} Hz），主要在{limbs_zh}。",
-        "en": "{n} rhythmic bouts ({total_s:.0f} s total, typical {hz:.1f} Hz), mostly {limbs_en}."
+        "en": "{n} rhythmic bouts ({total_s:.0f} s total, typical {hz:.1f} Hz), mostly {limbs_en}.",
+        "es": "{n} episodios rítmicos ({total_s:.0f} s en total, frecuencia típica {hz:.1f} Hz), sobre todo en {limbs_es}."
       },
       "explain": {
         "zh": "有节律的踢腿、挥手、摇晃是婴儿正常运动发展的一部分，不同动作在不同月龄最常见。这里只是记录，便于看长期变化。",
-        "en": "Rhythmic kicking, waving and rocking are a normal part of infant motor development, and different rhythms peak at different ages. This is recorded so you can see changes over time."
+        "en": "Rhythmic kicking, waving and rocking are a normal part of infant motor development, and different rhythms peak at different ages. This is recorded so you can see changes over time.",
+        "es": "Patalear, agitar los brazos y balancearse de forma rítmica es parte normal del desarrollo motor del bebé, y cada ritmo es más frecuente a una edad distinta. Se registra para que puedas ver los cambios con el tiempo."
       },
       "sources": [
         "S10"
@@ -394,13 +411,16 @@
       "band": "slow",
       "name": {
         "zh": "一侧肢体持续的规律抽动",
-        "en": "Sustained one-sided rhythmic jerking"
+        "en": "Sustained one-sided rhythmic jerking",
+        "es": "Sacudidas rítmicas mantenidas en un solo lado"
       },
       "requires": {
         "min_fps": 24,
         "series": "raw",
         "context_exclude": [
-          "held"
+          "held",
+          "standing",
+          "walking"
         ],
         "joints": [
           "leftShoulder",
@@ -497,15 +517,18 @@
       "severity": "safety",
       "message": {
         "zh": "{t0:.0f}–{t1:.0f} 秒：{limbs_zh}出现约 {hz:.1f} Hz 的规律性抽动，持续约 {dur:.0f} 秒，而另一侧相对安静。",
-        "en": "{t0:.0f}–{t1:.0f} s: regular jerking of the {limbs_en} at about {hz:.1f} Hz for {dur:.0f} s while the other side stayed relatively quiet."
+        "en": "{t0:.0f}–{t1:.0f} s: regular jerking of the {limbs_en} at about {hz:.1f} Hz for {dur:.0f} s while the other side stayed relatively quiet.",
+        "es": "{t0:.0f}–{t1:.0f} s: sacudidas regulares en {limbs_es} a unos {hz:.1f} Hz durante {dur:.0f} s, mientras el otro lado permanecía relativamente quieto."
       },
       "explain": {
         "zh": "临床指南把“一侧肢体以每秒 1–4 次规律抽动、握住也不停”描述为需要和抽搐区分的情况；正常的节律性踢腿通常两侧都参与、也会被安抚或握住打断。App 无法判断这是不是抽搐。",
-        "en": "Clinical guidance describes one limb or one side jerking regularly 1–4 times per second, not stopping when held, as something to tell apart from a seizure. Normal rhythmic kicking usually involves both sides and can be interrupted by soothing or holding. The app cannot tell whether this was a seizure."
+        "en": "Clinical guidance describes one limb or one side jerking regularly 1–4 times per second, not stopping when held, as something to tell apart from a seizure. Normal rhythmic kicking usually involves both sides and can be interrupted by soothing or holding. The app cannot tell whether this was a seizure.",
+        "es": "Las guías clínicas señalan que las sacudidas regulares de una extremidad o de un lado del cuerpo, de 1 a 4 veces por segundo y que no se detienen al sujetarlas, deben distinguirse de una convulsión. El pataleo rítmico normal suele darse en ambos lados y se puede interrumpir al calmar o sujetar al bebé. La app no puede saber si se trató de una convulsión."
       },
       "followup": {
         "zh": "如果再次出现：轻柔握住并换个姿势，看是否停止；记下持续时间并录像。若握住也不停、伴随凝视或面色/呼吸改变，请立即就医；持续 5 分钟以上请呼叫急救。",
-        "en": "If it happens again: gently hold and reposition the limb to see if it stops, note how long it lasts and record it. If it continues while held, or comes with staring or a change in colour or breathing, seek medical care now; if it lasts 5 minutes or more, call emergency services."
+        "en": "If it happens again: gently hold and reposition the limb to see if it stops, note how long it lasts and record it. If it continues while held, or comes with staring or a change in colour or breathing, seek medical care now; if it lasts 5 minutes or more, call emergency services.",
+        "es": "Si vuelve a ocurrir: sujeta suavemente la extremidad y cámbiala de posición para ver si se detiene, anota cuánto dura y grábalo. Si continúa mientras la sujetas, o se acompaña de mirada fija o de cambios de color o en la respiración, busca atención médica de inmediato; si dura 5 minutos o más, llama a emergencias."
       },
       "sources": [
         "S02",
@@ -522,13 +545,16 @@
       "analysis": "burst",
       "name": {
         "zh": "成串出现的短暂同步动作",
-        "en": "Clusters of brief synchronous movements"
+        "en": "Clusters of brief synchronous movements",
+        "es": "Series de movimientos breves y sincrónicos"
       },
       "requires": {
         "min_fps": 15,
         "series": "smoothed",
         "context_exclude": [
-          "held"
+          "held",
+          "standing",
+          "walking"
         ],
         "joints": [
           "leftShoulder",
@@ -655,15 +681,18 @@
       "severity": "safety",
       "message": {
         "zh": "检测到 {n} 次成串出现的短暂、四肢几乎同时的突然动作（每次约 {dur:.1f} 秒，间隔约 {iv:.0f} 秒）。",
-        "en": "{n} brief, sudden, near-synchronous movements occurred in a cluster (~{dur:.1f} s each, ~{iv:.0f} s apart)."
+        "en": "{n} brief, sudden, near-synchronous movements occurred in a cluster (~{dur:.1f} s each, ~{iv:.0f} s apart).",
+        "es": "Hubo una serie de {n} movimientos breves, súbitos y casi sincrónicos (~{dur:.1f} s cada uno, separados por ~{iv:.0f} s)."
       },
       "explain": {
-        "zh": "医学资料把婴儿痉挛描述为成串出现、每次约 1–3 秒的突然屈曲或伸展，间隔通常不到 1 分钟，常在入睡或醒来时出现；它需要尽快由医生评估，家长拍的视频对诊断很有帮助。单次的惊跳不会触发这条规则（至少需要 3 次成串）。App 无法做出诊断。",
-        "en": "Medical sources describe infantile spasms as clusters of sudden bends or stiffenings lasting about 1–3 seconds each, usually less than a minute apart, often when falling asleep or waking. They need prompt assessment by a doctor, and parent videos help. A single startle does not trigger this check (it needs at least 3 in a cluster). The app cannot make a diagnosis."
+        "zh": "医学资料把婴儿痉挛描述为成串出现、每次约 1–3 秒的突然屈曲或伸展，间隔通常不到 1 分钟，常在入睡或醒来时出现；它需要尽快由医生评估，家长拍的视频对诊断很有帮助。单次的惊跳不会触发这项检查（至少需要 3 次成串）。App 无法做出诊断。",
+        "en": "Medical sources describe infantile spasms as clusters of sudden bends or stiffenings lasting about 1–3 seconds each, usually less than a minute apart, often when falling asleep or waking. They need prompt assessment by a doctor, and parent videos help. A single startle does not trigger this check (it needs at least 3 in a cluster). The app cannot make a diagnosis.",
+        "es": "Las fuentes médicas describen los espasmos infantiles como series de movimientos bruscos en los que el cuerpo se dobla o se pone rígido, de 1 a 3 segundos cada uno, por lo general separados por menos de un minuto, a menudo al dormirse o al despertar. Requieren una valoración médica rápida, y los videos de los padres ayudan. Un solo sobresalto no activa esta comprobación (hacen falta al menos 3 seguidos). La app no puede hacer un diagnóstico."
       },
       "followup": {
         "zh": "如果这与你在现场看到的相符，请尽快联系儿科医生并出示这段视频（App 可以导出带时间点的片段）。",
-        "en": "If this matches what you saw, contact your paediatrician soon and show them this video (you can export the clip with its time stamps)."
+        "en": "If this matches what you saw, contact your paediatrician soon and show them this video (you can export the clip with its time stamps).",
+        "es": "Si esto coincide con lo que viste, consulta pronto a tu pediatra y muéstrale este video (puedes exportar el fragmento con sus marcas de tiempo)."
       },
       "sources": [
         "S05",
@@ -678,8 +707,9 @@
       "family": "posture",
       "analysis": "posture_side",
       "name": {
-        "zh": "头部总是转向同一侧",
-        "en": "Head-turn side preference"
+        "zh": "转头偏向一侧",
+        "en": "Head-turn side preference",
+        "es": "Preferencia por girar la cabeza hacia un lado"
       },
       "requires": {
         "min_fps": 5,
@@ -752,15 +782,18 @@
       "severity": "note",
       "message": {
         "zh": "本次转头时有 {pct:.0f}% 的时间朝向宝宝的{side_zh}（偏好指数 {pi:+.2f}，有效观察 {obs:.0f} 秒）。",
-        "en": "When the head was turned, {pct:.0f}% of the time it faced the baby's {side_en} (preference index {pi:+.2f}, {obs:.0f} s observed)."
+        "en": "When the head was turned, {pct:.0f}% of the time it faced the baby's {side_en} (preference index {pi:+.2f}, {obs:.0f} s observed).",
+        "es": "Cuando giraba la cabeza, el {pct:.0f} % del tiempo miraba hacia su lado {side_es} (índice de preferencia {pi:+.2f}, {obs:.0f} s observados)."
       },
       "explain": {
         "zh": "斜颈和体位性偏头的描述里，常见头一直偏向一侧、转向另一侧较少。单次录像容易受玩具或家长位置影响，所以只有多次、跨天都偏向同一侧才会提示与医生讨论。",
-        "en": "Descriptions of torticollis and positional preference include a head that keeps turning to one side and turns less to the other. A single recording is easily influenced by where toys or people are, so only a preference seen across several days suggests talking to a clinician."
+        "en": "Descriptions of torticollis and positional preference include a head that keeps turning to one side and turns less to the other. A single recording is easily influenced by where toys or people are, so only a preference seen across several days suggests talking to a clinician.",
+        "es": "Las descripciones de la tortícolis y de la preferencia postural incluyen una cabeza que gira una y otra vez hacia un lado y menos hacia el otro. Una sola grabación se ve fácilmente influida por dónde están los juguetes o las personas, así que solo una preferencia que se repite durante varios días sugiere consultar a un profesional."
       },
       "followup": {
         "zh": "下次录像时把玩具或你自己放在宝宝较少看的那一侧，看看宝宝能否主动转过去；如果多次都偏向同一侧，可以和儿科医生或物理治疗师聊聊。",
-        "en": "Next time, place a toy or yourself on the side your baby looks at less and see whether they turn that way. If several recordings show the same side, consider mentioning it to your paediatrician or a physiotherapist."
+        "en": "Next time, place a toy or yourself on the side your baby looks at less and see whether they turn that way. If several recordings show the same side, consider mentioning it to your paediatrician or a physiotherapist.",
+        "es": "La próxima vez, pon un juguete o colócate en el lado al que tu bebé mira menos y observa si gira hacia allí. Si varias grabaciones muestran el mismo lado, considera comentarlo con tu pediatra o con un fisioterapeuta."
       },
       "sources": [
         "S12"
@@ -774,7 +807,8 @@
       "analysis": "posture_stat",
       "name": {
         "zh": "头部持续向一侧歪",
-        "en": "Persistent head tilt"
+        "en": "Persistent head tilt",
+        "es": "Inclinación persistente de la cabeza"
       },
       "requires": {
         "min_fps": 5,
@@ -829,11 +863,13 @@
       "severity": "note",
       "message": {
         "zh": "本次眼睛连线相对肩线的中位倾斜约 {median:+.0f}°（头偏向宝宝的{side_zh}肩），有效观察 {obs:.0f} 秒。",
-        "en": "Median eye-line vs shoulder-line tilt {median:+.0f} deg (toward the baby's {side_en} shoulder), {obs:.0f} s observed."
+        "en": "Median eye-line vs shoulder-line tilt {median:+.0f} deg (toward the baby's {side_en} shoulder), {obs:.0f} s observed.",
+        "es": "Inclinación mediana de la línea de los ojos respecto a la de los hombros: {median:+.0f}° (hacia el hombro {side_es} del bebé), {obs:.0f} s observados."
       },
       "explain": {
         "zh": "照片测量“习惯性头偏斜”（眼线与肩线夹角）是斜颈随访里用过的方法；这里的 2D 估计受拍摄角度影响，属于研究功能。",
-        "en": "Habitual head tilt (the angle between the eye line and the shoulder line) has been measured from photos when following torticollis. This 2D estimate depends on camera angle, so it is a research feature."
+        "en": "Habitual head tilt (the angle between the eye line and the shoulder line) has been measured from photos when following torticollis. This 2D estimate depends on camera angle, so it is a research feature.",
+        "es": "La inclinación habitual de la cabeza (el ángulo entre la línea de los ojos y la de los hombros) se ha medido en fotos durante el seguimiento de la tortícolis. Esta estimación en 2D depende del ángulo de la cámara, así que es una función en fase de investigación."
       },
       "sources": [
         "S12"
@@ -846,8 +882,9 @@
       "family": "posture",
       "analysis": "posture",
       "name": {
-        "zh": "击剑样姿势（ATNR 样）持续出现",
-        "en": "ATNR-like (fencing) posture"
+        "zh": "击剑样姿势（ATNR 样）",
+        "en": "ATNR-like (fencing) posture",
+        "es": "Postura tipo RTCA (de esgrimista)"
       },
       "requires": {
         "min_fps": 5,
@@ -971,19 +1008,23 @@
       "severity": "note",
       "message": {
         "zh": "转头时有 {pct:.0f}% 的时间呈击剑样姿势（脸朝向一侧手臂伸直、另一侧手臂屈曲），共 {n} 段。",
-        "en": "ATNR-like fencing posture during {pct:.0f}% of head-turned time ({n} episodes)."
+        "en": "ATNR-like fencing posture during {pct:.0f}% of head-turned time ({n} episodes).",
+        "es": "Postura de esgrimista tipo RTCA durante el {pct:.0f} % del tiempo con la cabeza girada ({n} episodios)."
       },
       "message_expected": {
         "zh": "看到击剑样（ATNR 样）姿势。它在 1–4 个月最明显，通常 3–9 个月消失，属于这个月龄的常见表现。",
-        "en": "An ATNR-like (fencing) posture was seen. It is most visible at 1–4 months and usually disappears by 3–9 months, so it is common at this age."
+        "en": "An ATNR-like (fencing) posture was seen. It is most visible at 1–4 months and usually disappears by 3–9 months, so it is common at this age.",
+        "es": "Se vio una postura de esgrimista tipo RTCA. Se nota más entre el primer y el cuarto mes y suele desaparecer entre los 3 y los 9 meses, así que es habitual a esta edad."
       },
       "explain": {
         "zh": "ATNR 是一种原始反射：头转向一侧时，脸朝向的一侧手臂伸展、后脑一侧屈曲；通常在 3–9 个月消失。月龄更大时仍经常、持续地出现，是值得和医生说的情况。",
-        "en": "The ATNR is a primitive reflex: when the head turns, the arm on the face side extends and the other arm bends. It usually disappears by 3–9 months. Seeing it often and for long periods at an older age is worth mentioning to a doctor."
+        "en": "The ATNR is a primitive reflex: when the head turns, the arm on the face side extends and the other arm bends. It usually disappears by 3–9 months. Seeing it often and for long periods at an older age is worth mentioning to a doctor.",
+        "es": "El RTCA (reflejo tónico cervical asimétrico) es un reflejo primitivo: al girar la cabeza, el brazo del lado hacia el que mira la cara se extiende y el otro se flexiona. Suele desaparecer entre los 3 y los 9 meses. Verlo a menudo y durante mucho tiempo a una edad mayor es algo que conviene comentar con un médico."
       },
       "followup": {
         "zh": "多录几次不同时间的视频；如果宝宝 6 个月后仍经常保持这个姿势、或很难从这个姿势中自己动出来，请和医生聊聊。",
-        "en": "Record a few more videos at different times. If after 6 months your baby still often holds this posture, or has trouble moving out of it, talk to your doctor."
+        "en": "Record a few more videos at different times. If after 6 months your baby still often holds this posture, or has trouble moving out of it, talk to your doctor.",
+        "es": "Graba algunos videos más en distintos momentos. Si después de los 6 meses tu bebé sigue adoptando esta postura con frecuencia, o le cuesta salir de ella, habla con tu médico."
       },
       "sources": [
         "S11"
@@ -997,7 +1038,8 @@
       "analysis": "posture",
       "name": {
         "zh": "蛙腿样姿势且腿部活动少",
-        "en": "Frog-leg posture with low leg activity"
+        "en": "Frog-leg posture with low leg activity",
+        "es": "Postura de rana con poca actividad de las piernas"
       },
       "requires": {
         "min_fps": 5,
@@ -1121,15 +1163,18 @@
       "severity": "note",
       "message": {
         "zh": "本次 {pct:.0f}% 的观察时间里双腿呈外展、屈膝、平贴床面的蛙腿样姿势，同时腿部活动较少（活动时间占 {leg_act:.0f}%）。",
-        "en": "Frog-leg-like leg posture for {pct:.0f}% of observed time with low leg activity ({leg_act:.0f}% active)."
+        "en": "Frog-leg-like leg posture for {pct:.0f}% of observed time with low leg activity ({leg_act:.0f}% active).",
+        "es": "Piernas en postura de rana durante el {pct:.0f} % del tiempo observado, con poca actividad de las piernas (activas el {leg_act:.0f} % del tiempo)."
       },
       "explain": {
         "zh": "仰卧时的“蛙腿”姿势、或休息时四肢伸直平放，是临床上对肌张力偏低的初步印象之一。单次录像不能说明问题，困倦、包裹、衣物也会影响。",
-        "en": "A frog-leg position when lying on the back, or arms and legs lying straight and still at rest, is one of the first impressions clinicians use for low muscle tone. One recording proves nothing; sleepiness, swaddling and clothing also matter."
+        "en": "A frog-leg position when lying on the back, or arms and legs lying straight and still at rest, is one of the first impressions clinicians use for low muscle tone. One recording proves nothing; sleepiness, swaddling and clothing also matter.",
+        "es": "La postura de rana boca arriba, o los brazos y las piernas estirados e inmóviles en reposo, es una de las primeras impresiones que usan los profesionales para sospechar un tono muscular bajo. Una sola grabación no demuestra nada; el sueño, estar envuelto y la ropa también influyen."
       },
       "followup": {
         "zh": "在宝宝清醒、心情好的时候再录几次；如果总是这样且很少抬腿踢腿，可以带视频和医生讨论。",
-        "en": "Record again when your baby is awake and content. If the legs are always like this and your baby rarely lifts or kicks them, discuss the videos with your doctor."
+        "en": "Record again when your baby is awake and content. If the legs are always like this and your baby rarely lifts or kicks them, discuss the videos with your doctor.",
+        "es": "Vuelve a grabar cuando tu bebé esté despierto y contento. Si las piernas siempre están así y tu bebé rara vez las levanta o patalea, comenta los videos con tu médico."
       },
       "sources": [
         "S13"
@@ -1143,7 +1188,8 @@
       "analysis": "posture",
       "name": {
         "zh": "双腿伸直并交叉（剪刀样）",
-        "en": "Extended, crossed legs (scissoring-like)"
+        "en": "Extended, crossed legs (scissoring-like)",
+        "es": "Piernas extendidas y cruzadas (en tijera)"
       },
       "requires": {
         "min_fps": 5,
@@ -1238,11 +1284,13 @@
       "severity": "note",
       "message": {
         "zh": "本次有 {n} 段（共 {true_s:.0f} 秒）双腿伸直、并拢并交叉的姿势。",
-        "en": "{n} episodes ({true_s:.0f} s) of extended, adducted, crossed legs."
+        "en": "{n} episodes ({true_s:.0f} s) of extended, adducted, crossed legs.",
+        "es": "{n} episodios ({true_s:.0f} s) con las piernas extendidas, juntas y cruzadas."
       },
       "explain": {
-        "zh": "官方资料描述的是“抱起时双腿变僵、交叉或呈剪刀样”。仰卧录像只是近似场景，所以这条规则还在研究阶段。",
-        "en": "Official guidance describes legs that stiffen and cross or scissor when the baby is picked up. A video of the baby lying on the back is only an approximation of that situation, so this check is still a research feature."
+        "zh": "官方资料描述的是“抱起时双腿变僵、交叉或呈剪刀样”。仰卧录像只是近似场景，所以这项检查还在研究阶段。",
+        "en": "Official guidance describes legs that stiffen and cross or scissor when the baby is picked up. A video of the baby lying on the back is only an approximation of that situation, so this check is still a research feature.",
+        "es": "Las guías oficiales describen piernas que se ponen rígidas y se cruzan en tijera cuando se levanta al bebé. Un video del bebé boca arriba solo se aproxima a esa situación, así que esta comprobación sigue en fase de investigación."
       },
       "sources": [
         "S14"
@@ -1256,7 +1304,8 @@
       "analysis": "activity",
       "name": {
         "zh": "一侧手臂明显动得少",
-        "en": "One arm moves much less"
+        "en": "One arm moves much less",
+        "es": "Un brazo se mueve mucho menos"
       },
       "requires": {
         "min_fps": 10,
@@ -1335,15 +1384,18 @@
       "severity": "note",
       "message": {
         "zh": "本次宝宝的{side_zh}手臂活动量明显少于另一侧（不对称指数 {ai:+.2f}）。",
-        "en": "The baby's {side_en} arm moved much less than the other (asymmetry index {ai:+.2f})."
+        "en": "The baby's {side_en} arm moved much less than the other (asymmetry index {ai:+.2f}).",
+        "es": "El brazo {side_es} del bebé se movió mucho menos que el otro (índice de asimetría {ai:+.2f})."
       },
       "explain": {
         "zh": "研究发现，后来发展为单侧脑瘫的婴儿，在自发动作和够物中常出现两侧不对称，约 15 周后更明显；12 个月前出现明显的单手偏好也被视为需要评估的信号。遮挡、侧卧、玩具只放一边都会造成假象。",
-        "en": "Studies found that infants who later develop one-sided cerebral palsy often move one side less in spontaneous movements and reaching, more clearly after about 15 weeks; a strong hand preference before 12 months is also a sign to have checked. Occlusion, lying on one side or toys placed on one side can all create this pattern."
+        "en": "Studies found that infants who later develop one-sided cerebral palsy often move one side less in spontaneous movements and reaching, more clearly after about 15 weeks; a strong hand preference before 12 months is also a sign to have checked. Occlusion, lying on one side or toys placed on one side can all create this pattern.",
+        "es": "Los estudios han observado que los bebés que más adelante desarrollan una parálisis cerebral unilateral a menudo mueven menos un lado en los movimientos espontáneos y al intentar alcanzar objetos, de forma más clara a partir de unas 15 semanas; una preferencia marcada por una mano antes de los 12 meses también es un signo que conviene revisar. Que algo tape la vista, que el bebé esté de lado o que los juguetes estén en un solo lado pueden producir el mismo patrón."
       },
       "followup": {
         "zh": "确认两侧都在画面里、光线相近，把玩具放在中间或换到另一侧再录；如果多次、跨天都是同一侧更少动，请和医生聊聊。",
-        "en": "Make sure both sides are in view with similar lighting, put toys in the middle or on the other side and record again. If several recordings on different days show the same side moving less, talk to your doctor."
+        "en": "Make sure both sides are in view with similar lighting, put toys in the middle or on the other side and record again. If several recordings on different days show the same side moving less, talk to your doctor.",
+        "es": "Asegúrate de que ambos lados se vean con una luz parecida, pon los juguetes en el centro o en el otro lado y vuelve a grabar. Si varias grabaciones de días distintos muestran que el mismo lado se mueve menos, habla con tu médico."
       },
       "sources": [
         "S15",
@@ -1359,7 +1411,8 @@
       "analysis": "posture",
       "name": {
         "zh": "未观察到双手在中线合拢",
-        "en": "Hands-together at midline not observed"
+        "en": "Hands-together at midline not observed",
+        "es": "No se vieron las manos juntas en la línea media"
       },
       "requires": {
         "min_fps": 5,
@@ -1444,11 +1497,13 @@
       "severity": "info",
       "message": {
         "zh": "本次 {obs:.0f} 秒的录像里没有看到双手在身体中线附近合拢。",
-        "en": "Hands were not seen together at the midline in {obs:.0f} s of video."
+        "en": "Hands were not seen together at the midline in {obs:.0f} s of video.",
+        "es": "No se vieron las manos juntas en la línea media en {obs:.0f} s de video."
       },
       "explain": {
         "zh": "6 个月以上仍很难把双手合在一起，是官方资料列出的需要留意的表现之一。一次没拍到很正常；只有多次都没看到才会提醒。",
-        "en": "Having a hard time bringing the hands together after 6 months is listed in official guidance as something to watch. Missing it in one video is normal; the app only highlights it after several recordings."
+        "en": "Having a hard time bringing the hands together after 6 months is listed in official guidance as something to watch. Missing it in one video is normal; the app only highlights it after several recordings.",
+        "es": "Tener dificultad para juntar las manos después de los 6 meses figura en las guías oficiales como algo a vigilar. Que no aparezca en un video es normal; la app solo lo destaca después de varias grabaciones."
       },
       "sources": [
         "S14"
@@ -1462,11 +1517,13 @@
       "analysis": "none",
       "name": {
         "zh": "握拳 / 手指姿势",
-        "en": "Fisting / finger postures"
+        "en": "Fisting / finger postures",
+        "es": "Puños cerrados y posturas de los dedos"
       },
       "abstain_reason": {
-        "zh": "当前姿态模型（COCO-17）没有手指关键点，无法判断握拳或手指姿势，所以这条不做判断。",
-        "en": "COCO-17 has no finger keypoints."
+        "zh": "当前姿态模型（COCO-17）没有手指关键点，因此无法检查握拳或手指姿势。",
+        "en": "COCO-17 has no finger keypoints.",
+        "es": "El modelo COCO-17 no tiene puntos clave para los dedos."
       },
       "sources": [
         "S14",

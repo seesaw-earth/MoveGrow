@@ -16,7 +16,7 @@ struct MotorEngineInput {
 }
 
 final class MotorEngine {
-    static let version = "motor-rules-swift-0.1"
+    static let version = "motor-rules-swift-0.2"  // 0.2: Spanish texts (stored results are re-rendered)
     let book: MotorRuleBook
 
     init(book: MotorRuleBook) { self.book = book }
@@ -24,6 +24,15 @@ final class MotorEngine {
     private static let limbZh: [MotorChannel: String] = [.L_arm: "左臂", .R_arm: "右臂", .L_leg: "左腿", .R_leg: "右腿"]
     private static let limbEn: [MotorChannel: String] = [.L_arm: "left arm", .R_arm: "right arm", .L_leg: "left leg", .R_leg: "right leg"]
     private static let sideZh = ["L": "左侧", "R": "右侧"], sideEn = ["L": "left", "R": "right"]
+    /// Spanish limbs with their article, and sides agreeing with "lado" / "brazo" / "hombro".
+    private static let limbEs: [MotorChannel: String] = [.L_arm: "el brazo izquierdo", .R_arm: "el brazo derecho",
+                                                         .L_leg: "la pierna izquierda", .R_leg: "la pierna derecha"]
+    private static let sideEs = ["L": "izquierdo", "R": "derecho"]
+
+    /// "el brazo izquierdo y la pierna derecha"
+    private static func listEs(_ items: [String]) -> String {
+        items.count <= 1 ? (items.first ?? "") : items.dropLast().joined(separator: ", ") + " y " + items.last!
+    }
 
     /// Lazily computed shared analyses for one session.
     private final class Env {
@@ -67,7 +76,8 @@ final class MotorEngine {
             findings.append(run(rule, env))
         }
         return MotorReport(engine: Self.version, rulesSchema: book.schema, generatedAt: Date(), ageWeeks: input.ageWeeks,
-                           context: ctx, findings: findings, highFrequencyComplete: s.fs >= 24)
+                           context: ctx, findings: findings, highFrequencyComplete: s.fs >= 24,
+                           rulesFingerprint: book.fingerprint)
     }
 
     // MARK: context
@@ -81,16 +91,20 @@ final class MotorEngine {
         if s.fs < 24 {
             notes.append(LocalizedText(
                 zh: String(format: "采样约 %.0f fps，奈奎斯特频率 %.1f Hz：无法分析 6 Hz 以上的抖动；若是从更高帧率视频直接抽帧，高频抖动还会混叠成低频假象。", s.fs, nyq),
-                en: String(format: "About %.0f fps (Nyquist %.1f Hz): shaking faster than 6 Hz can't be analysed, and skipping frames from a faster video would fold it into slower, false rhythms.", s.fs, nyq)))
+                en: String(format: "About %.0f fps (Nyquist %.1f Hz): shaking faster than 6 Hz can't be analysed, and skipping frames from a faster video would fold it into slower, false rhythms.", s.fs, nyq),
+                es: "Unos \(String(format: "%.0f", s.fs)) fps (Nyquist \(String(format: "%.1f", nyq).replacingOccurrences(of: ".", with: ",")) Hz): "
+                    + "no se pueden analizar temblores de más de 6 Hz, y saltar fotogramas de un video más rápido los convertiría en ritmos más lentos y falsos."))
         }
         if s.aspectAssumed {
             notes.append(LocalizedText(zh: "存档中没有画面宽高比，按 9:16 竖屏处理；角度类特征可能有偏差。",
-                                       en: "The video's aspect ratio was missing, so 9:16 portrait was assumed; angles may be off."))
+                                       en: "The video's aspect ratio was missing, so 9:16 portrait was assumed; angles may be off.",
+                                       es: "Faltaba la relación de aspecto del video, así que se supuso un formato vertical 9:16; los ángulos pueden no ser exactos."))
         }
         let light = Double(s.lightOK.filter { $0 }.count) / Double(s.count)
         if light < 0.7 {
             notes.append(LocalizedText(zh: String(format: "只有 %.0f%% 的帧光线合格。", light * 100),
-                                       en: String(format: "Only %.0f%% of frames were well lit.", light * 100)))
+                                       en: String(format: "Only %.0f%% of frames were well lit.", light * 100),
+                                       es: String(format: "Solo el %.0f %% de los fotogramas tenía buena luz.", light * 100)))
         }
         var camRms: Double?, r2: Double?
         if s.fs >= 24 {
@@ -126,20 +140,29 @@ final class MotorEngine {
             out.status = .abstained
             out.abstainReason = LocalizedText(
                 zh: String(format: "需要 ≥%.0f fps，本次约 %.0f fps（奈奎斯特 %.1f Hz）。", minFps, s.fs, s.fs / 2),
-                en: String(format: "Needs at least %.0f fps; this video was analysed at about %.0f fps.", minFps, s.fs))
+                en: String(format: "Needs at least %.0f fps; this video was analysed at about %.0f fps.", minFps, s.fs),
+                es: String(format: "Necesita al menos %.0f fps; este video se analizó a unos %.0f fps.", minFps, s.fs))
             return out
         }
         let ctxt = env.input.context
         if let allowed = req?.context, !allowed.contains(ctxt) {
             out.status = .abstained
-            out.abstainReason = LocalizedText(zh: "这条只在宝宝仰卧、镜头从上往下拍时判断（本次：\(Self.contextZh(ctxt))）。",
-                                              en: "This check only runs when the baby is lying on their back, filmed from above (this video: \(Self.contextEn(ctxt))).")
+            out.abstainReason = LocalizedText(zh: "这项检查只在宝宝仰卧、镜头从上往下拍时进行（本次：\(Self.contextZh(ctxt))）。",
+                                              en: "This check only runs when the baby is lying on their back, filmed from above (this video: \(Self.contextEn(ctxt))).",
+                                              es: "Esta comprobación solo se hace con el bebé boca arriba, grabado desde arriba (este video: \(Self.contextEs(ctxt))).")
             return out
         }
         if let excluded = req?.context_exclude, excluded.contains(ctxt) {
             out.status = .abstained
-            out.abstainReason = LocalizedText(zh: "被抱着时大人的手会带来晃动和约束，这条不做判断。",
-                                              en: "Skipped while the baby is being held: an adult's hands move and restrain the limbs.")
+            if ctxt == "standing" || ctxt == "walking" {
+                out.abstainReason = LocalizedText(zh: "站立和走路本身就有节律性的动作，因此不做这项检查。",
+                                                  en: "Skipped while standing or walking: upright movement is rhythmic by itself.",
+                                                  es: "No se hace de pie ni caminando: el movimiento erguido ya es rítmico de por sí.")
+            } else {
+                out.abstainReason = LocalizedText(zh: "被抱着时大人的手会带来晃动和约束，因此不做这项检查。",
+                                                  en: "Skipped while the baby is being held: an adult's hands move and restrain the limbs.",
+                                                  es: "No se hace con el bebé en brazos: las manos del adulto mueven y sujetan las extremidades.")
+            }
             return out
         }
         if let joints = req?.joints, !joints.isEmpty {
@@ -151,7 +174,8 @@ final class MotorEngine {
                 out.status = .abstained
                 out.abstainReason = LocalizedText(
                     zh: String(format: "所需的身体部位只在 %.0f%% 的画面中清楚可见（需要 ≥%.0f%%）。", cov * 100, need * 100),
-                    en: String(format: "The body parts this needs were clearly visible in %.0f%% of frames (needs %.0f%%).", cov * 100, need * 100))
+                    en: String(format: "The body parts this needs were clearly visible in %.0f%% of frames (needs %.0f%%).", cov * 100, need * 100),
+                    es: String(format: "Las partes del cuerpo necesarias se vieron con claridad en el %.0f %% de los fotogramas (se necesita el %.0f %%).", cov * 100, need * 100))
                 return out
             }
         }
@@ -159,18 +183,21 @@ final class MotorEngine {
         if let ag = rule.age_weeks {
             guard let age = env.input.ageWeeks else {
                 out.status = .abstained
-                out.abstainReason = LocalizedText(zh: "需要宝宝的（矫正）月龄。", en: "Needs your baby's (corrected) age.")
+                out.abstainReason = LocalizedText(zh: "需要宝宝的（矫正）月龄。", en: "Needs your baby's (corrected) age.",
+                                                  es: "Necesita la edad (corregida) de tu bebé.")
                 return out
             }
             if let mx = ag.max, age > mx {
                 out.status = .notApplicable
-                out.abstainReason = LocalizedText(zh: "超出这条适用的月龄范围。", en: "Outside the age range for this check.")
+                out.abstainReason = LocalizedText(zh: "超出这项检查适用的月龄范围。", en: "Outside the age range for this check.",
+                                                  es: "Fuera del rango de edad de esta comprobación.")
                 return out
             }
             if let mn = ag.min, age < mn {
                 if ag.below_min_status == "expected_for_age" { below = true } else {
                     out.status = .notApplicable
-                    out.abstainReason = LocalizedText(zh: "还没到这条适用的月龄。", en: "Your baby is younger than the age this check applies to.")
+                    out.abstainReason = LocalizedText(zh: "还没到这项检查适用的月龄。", en: "Your baby is younger than the age this check applies to.",
+                                                      es: "Tu bebé aún no tiene la edad a la que se aplica esta comprobación.")
                     return out
                 }
             }
@@ -196,15 +223,21 @@ final class MotorEngine {
     }
 
     private static func contextZh(_ c: String) -> String {
-        ["supine": "仰卧", "prone": "趴着", "held": "被抱着", "sitting": "坐着"][c] ?? "其他"
+        ["supine": "仰卧", "prone": "趴着", "held": "被抱着", "sitting": "坐着", "standing": "站着", "walking": "走路"][c] ?? "其他"
     }
     private static func contextEn(_ c: String) -> String {
-        ["supine": "lying on back", "prone": "tummy time", "held": "being held", "sitting": "sitting"][c] ?? "other"
+        ["supine": "lying on back", "prone": "tummy time", "held": "being held", "sitting": "sitting",
+         "standing": "standing", "walking": "walking"][c] ?? "other"
+    }
+    private static func contextEs(_ c: String) -> String {
+        ["supine": "boca arriba", "prone": "boca abajo", "held": "en brazos", "sitting": "sentado",
+         "standing": "de pie", "walking": "caminando"][c] ?? "otra postura"
     }
 
     private func render(_ rule: MotorRule, _ text: LocalizedText?, _ values: [String: Any]) -> LocalizedText? {
         guard let text else { return nil }
-        return LocalizedText(zh: RuleTemplate.render(text.zh, values), en: RuleTemplate.render(text.en, values))
+        return LocalizedText(zh: RuleTemplate.render(text.zh, values), en: RuleTemplate.render(text.en, values),
+                             es: RuleTemplate.render(text.es, values, decimalComma: true))
     }
 
     // MARK: handlers
@@ -219,9 +252,13 @@ final class MotorEngine {
 
     private func spectral(_ rule: MotorRule, _ env: Env, _ out: inout MotorFinding) {
         let S = env.spectralResult(rule.band ?? "slow")
-        if let reason = S.abstain {
+        if S.abstain != nil {
             out.status = .abstained
-            out.abstainReason = LocalizedText(zh: reason, en: reason)
+            // The engine's own reason is technical ("sampling rate … too low for … band").
+            out.abstainReason = LocalizedText(
+                zh: String(format: "帧率（约 %.0f fps）太低，无法分析这类节律。", env.s.fs),
+                en: String(format: "The frame rate (about %.0f fps) is too low to analyse this rhythm.", env.s.fs),
+                es: String(format: "La frecuencia de imagen (unos %.0f fps) es demasiado baja para analizar este ritmo.", env.s.fs))
             return
         }
         guard let pred = rule.window_predicate else { out.status = .abstained; return }
@@ -282,6 +319,8 @@ final class MotorEngine {
                 "limbs_en": chans.map { Self.limbEn[$0]! }.joined(separator: ", "),
                 "laterality_zh": bil ? "双侧" : "仅\(Self.sideZh[side]!)",
                 "laterality_en": bil ? "both sides" : "\(Self.sideEn[side]!) side only",
+                "limbs_es": Self.listEs(chans.map { Self.limbEs[$0]! }),
+                "laterality_es": bil ? "en ambos lados" : "solo en el lado \(Self.sideEs[side]!)",
             ]
             ev.message = render(rule, rule.message, kw)
             events.append(ev)
@@ -307,13 +346,15 @@ final class MotorEngine {
                 "n": events.count, "total_s": total, "hz": hz,
                 "limbs_zh": top.map { Self.limbZh[$0]! }.joined(separator: "、"),
                 "limbs_en": top.map { Self.limbEn[$0]! }.joined(separator: ", "),
+                "limbs_es": Self.listEs(top.map { Self.limbEs[$0]! }),
             ])
         } else if events.count == 1 {
             out.message = events[0].message
         } else {
             let first = events[0].message
             out.message = LocalizedText(zh: "共 \(events.count) 段；第一段：" + (first?.zh ?? ""),
-                                        en: "\(events.count) episodes; first: " + (first?.en ?? ""))
+                                        en: "\(events.count) episodes; first: " + (first?.en ?? ""),
+                                        es: "\(events.count) episodios; el primero: " + (first?.es ?? first?.en ?? ""))
         }
     }
 
@@ -385,7 +426,7 @@ final class MotorEngine {
         out.direction = detected ? side : nil
         if detected {
             out.message = render(rule, rule.message, ["pct": turned > 0 ? 100 * max(TL, TR) / turned : 0,
-                                                      "side_zh": Self.sideZh[side]!, "side_en": Self.sideEn[side]!,
+                                                      "side_zh": Self.sideZh[side]!, "side_en": Self.sideEn[side]!, "side_es": Self.sideEs[side]!,
                                                       "pi": pi.isFinite ? pi : 0, "obs": obs])
         }
     }
@@ -405,7 +446,7 @@ final class MotorEngine {
         out.direction = detected ? side : nil
         if detected {
             out.message = render(rule, rule.message, ["median": med.isFinite ? med : 0, "side_zh": Self.sideZh[side]!,
-                                                      "side_en": Self.sideEn[side]!, "obs": obs])
+                                                      "side_en": Self.sideEn[side]!, "side_es": Self.sideEs[side]!, "obs": obs])
         }
     }
 
@@ -423,7 +464,7 @@ final class MotorEngine {
         out.status = detected ? .detected : .notDetected
         out.direction = detected ? side : nil
         if detected {
-            out.message = render(rule, rule.message, ["side_zh": Self.sideZh[side]!, "side_en": Self.sideEn[side]!,
+            out.message = render(rule, rule.message, ["side_zh": Self.sideZh[side]!, "side_en": Self.sideEn[side]!, "side_es": Self.sideEs[side]!,
                                                       "ai": a.session["arm_asym_index"] ?? 0])
         }
     }

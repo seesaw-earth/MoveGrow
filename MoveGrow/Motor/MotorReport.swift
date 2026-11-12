@@ -70,6 +70,7 @@ struct MotorReport: Codable, Hashable {
     var context: MotorContext
     var findings: [MotorFinding]
     var highFrequencyComplete: Bool
+    var rulesFingerprint: String? = nil
 
     var shown: [MotorFinding] {
         findings.filter(\.isShown).sorted { ($0.severity, $1.ruleID) > ($1.severity, $0.ruleID) }
@@ -77,7 +78,8 @@ struct MotorReport: Codable, Hashable {
     var summary: MotorSummary {
         MotorSummary(engine: engine, generatedAt: generatedAt, highFrequencyComplete: highFrequencyComplete,
                      fs: context.fs, contextTag: context.contextTag,
-                     statuses: Dictionary(uniqueKeysWithValues: findings.map { ($0.ruleID, MotorSummary.Entry(status: $0.status, severity: $0.severity, direction: $0.direction)) }))
+                     statuses: Dictionary(uniqueKeysWithValues: findings.map { ($0.ruleID, MotorSummary.Entry(status: $0.status, severity: $0.severity, direction: $0.direction)) }),
+                     rulesFingerprint: rulesFingerprint, ageWeeks: ageWeeks)
     }
 }
 
@@ -94,6 +96,8 @@ struct MotorSummary: Codable, Hashable {
     var fs: Double
     var contextTag: String
     var statuses: [String: Entry]
+    var rulesFingerprint: String? = nil
+    var ageWeeks: Double? = nil
 
     var highestShownSeverity: FindingSeverity? {
         statuses.values.filter { $0.status == .detected }.map(\.severity).max()
@@ -148,7 +152,10 @@ enum MotorLongitudinal {
                         ((same && sideZh != nil) ? "（均偏向宝宝的\(sideZh!)）" : "") + "。建议带上这些视频和医生或物理治疗师聊聊。"
                     let en = "\(rule.name.en ?? rule.id): seen in \(det.count) of \(rows.count) recordings over \(span) days" +
                         ((same && sideEn != nil) ? " (always toward the baby's \(sideEn!))" : "") + ". Consider showing these videos to your doctor or physiotherapist."
-                    trend.message = LocalizedText(zh: zh, en: en)
+                    let sideEs = ["L": "izquierdo", "R": "derecho"][top]
+                    let es = "\(rule.name.es ?? rule.name.en ?? rule.id): se vio en \(det.count) de \(rows.count) grabaciones a lo largo de \(span) días" +
+                        ((same && sideEs != nil) ? " (siempre hacia el lado \(sideEs!) del bebé)" : "") + ". Considera mostrar estos videos a tu médico o a un fisioterapeuta."
+                    trend.message = LocalizedText(zh: zh, en: en, es: es)
                 }
             }
             out.append(trend)

@@ -84,3 +84,29 @@ If the final archived binary contains no additional telemetry or third-party dat
 **No, we do not collect data from this app.**
 
 This must be re-verified against the final archived build and all third-party SDK behavior before publishing the privacy label.
+
+## 1.2 review notes (suggested)
+
+MoveGrow is a parent-facing local video journal. No account or login is required.
+
+Core flow for review:
+1. Create a local baby profile using any nickname and birthday.
+2. Record a short video, or import a non-sensitive video using the system Photos picker.
+3. The video is analysed on the device (InstantHMR 3D body model, with YOLO26l-pose finding the person). Open
+   the memory: the Kinematics tab shows movement over time, the 3D tab a figure following the video, Summary
+   and Noticed the descriptive observations. ⋯ → YOLO pose shows the 2D skeleton on request.
+
+Observations: MoveGrow describes visible movement patterns using rules taken from published descriptions
+(each observation lists its sources). A few patterns that published guidance says a doctor should see — for
+example clusters of brief synchronous movements or one-sided rhythmic jerking — are marked "Talk to a doctor
+soon". The app states that it cannot tell what a movement was, and that it is not a screening test, diagnosis
+or medical device.
+
+Privacy and network behavior: all analysis runs on the device; videos, pose data, summaries and milestones
+stay on the iPhone. The Core ML models are compiled into the app at build time; nothing is downloaded at
+runtime. No advertising, tracking or analytics.
+
+## 1.2 description bullets to replace
+
+- "See a pose skeleton aligned with the original video" → "See movement over time and a 3D figure that follows the video"
+- "No advertising or cross-app tracking in version 1.0" → "No advertising or cross-app tracking"

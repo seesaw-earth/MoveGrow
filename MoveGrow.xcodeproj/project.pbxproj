@@ -67,6 +67,8 @@
 				C9ACFD7BC0FBBF51C217D28A /* Frameworks */,
 				E1D131FBF07FDDF427254EE0 /* Resources */,
 				E9F6A1C2D3E4F5061728394A /* Bundle YOLO Pose Model */,
+				B4D2C6A8E1F3097A5C3E2D10 /* Bundle InstantHMR Models */,
+				C7E3A9F1B2D4086C5E1F3A27 /* Strip Quarantine Attributes */,
 			);
 			buildRules = (
 			);
@@ -105,6 +107,8 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
+				es,
 			);
 			mainGroup = 77CC1E9A05C8655C9F6B9471;
 			minimizedProjectReferenceProxies = 1;
@@ -151,6 +155,46 @@
 			shellScript = "\"$SRCROOT/Scripts/bundle-yolo-pose.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		B4D2C6A8E1F3097A5C3E2D10 /* Bundle InstantHMR Models */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Bundle InstantHMR Models";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$SRCROOT/Scripts/bundle-instanthmr.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C7E3A9F1B2D4086C5E1F3A27 /* Strip Quarantine Attributes */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Strip Quarantine Attributes";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$SRCROOT/Scripts/strip-quarantine.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -170,16 +214,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 5Y62DWN7RS;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INSTANTHMR_MODELS_DIR = "$(HOME)/Downloads/coreml";
 				INFOPLIST_FILE = MoveGrow/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MoveGrow;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSCameraUsageDescription = "MoveGrow uses the camera to record your baby's movement videos and display an on-device skeleton overlay.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MoveGrow uses the camera to record your baby's movement videos. They are analysed on this iPhone.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "MoveGrow saves the videos and images you export to your photo library when you tap Save to Photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIFileSharingEnabled = NO;
@@ -190,7 +236,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ziqingshi.movegrow;
 				PRODUCT_NAME = MoveGrow;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -205,16 +251,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 5Y62DWN7RS;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INSTANTHMR_MODELS_DIR = "$(HOME)/Downloads/coreml";
 				INFOPLIST_FILE = MoveGrow/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MoveGrow;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSCameraUsageDescription = "MoveGrow uses the camera to record your baby's movement videos and display an on-device skeleton overlay.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MoveGrow uses the camera to record your baby's movement videos. They are analysed on this iPhone.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "MoveGrow saves the videos and images you export to your photo library when you tap Save to Photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIFileSharingEnabled = NO;
@@ -225,7 +273,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ziqingshi.movegrow;
 				PRODUCT_NAME = MoveGrow;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -277,7 +325,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -332,7 +380,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};

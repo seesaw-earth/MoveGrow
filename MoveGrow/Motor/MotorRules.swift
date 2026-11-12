@@ -5,18 +5,24 @@
 
 import Foundation
 
-/// A short text in the two languages the rule book carries.
+/// A short text in the languages the rule book carries (Chinese, English, Spanish).
 struct LocalizedText: Codable, Hashable {
     var zh: String?
     var en: String?
+    var es: String?
 
-    /// Chinese for Chinese-language devices, otherwise English (falling back to whichever exists).
-    func resolved(preferChinese: Bool = LocalizedText.prefersChinese) -> String {
-        (preferChinese ? (zh ?? en) : (en ?? zh)) ?? ""
+    init(zh: String?, en: String?, es: String? = nil) {
+        self.zh = zh
+        self.en = en
+        self.es = es
     }
 
-    static var prefersChinese: Bool {
-        (Locale.preferredLanguages.first ?? "en").lowercased().hasPrefix("zh")
+    /// The text for a language code ("zh-Hans", "es", "en"), falling back to English, then any.
+    func resolved(_ language: String) -> String {
+        let code = language.lowercased()
+        if code.hasPrefix("zh") { return zh ?? en ?? es ?? "" }
+        if code.hasPrefix("es") { return es ?? en ?? zh ?? "" }
+        return en ?? zh ?? es ?? ""
     }
 }
 
@@ -213,6 +219,17 @@ struct MotorRuleBook: Decodable {
 
     func rule(_ id: String) -> MotorRule? { rules.first { $0.id == id } }
 
+    /// Changes whenever a rule is added, removed or re-versioned; stored with each result so
+    /// observations are recomputed (from the saved pose track, without re-running the video)
+    /// after an app update ships new rules.
+    var fingerprint: String {
+        var h: UInt64 = 0xcbf29ce484222325                       // FNV-1a 64
+        for byte in ([schema] + rules.map { "\($0.id)@\($0.version)/\($0.status)" }).joined(separator: ",").utf8 {
+            h ^= UInt64(byte); h = h &* 0x100000001b3
+        }
+        return String(h, radix: 16)
+    }
+
     /// The copy shipped in the app bundle.
     static let bundled: MotorRuleBook? = {
         guard let r = Bundle.main.url(forResource: "rules", withExtension: "json"),
@@ -224,7 +241,8 @@ struct MotorRuleBook: Decodable {
 
 /// Minimal Python `str.format` for rule templates: `{name}`, `{name:.1f}`, `{name:+.2f}`.
 enum RuleTemplate {
-    static func render(_ template: String?, _ values: [String: Any]) -> String? {
+    /// Fills {name} / {name:.1f} / {name:+.2f}. `decimalComma` writes 8,5 instead of 8.5 (Spanish).
+    static func render(_ template: String?, _ values: [String: Any], decimalComma: Bool = false) -> String? {
         guard let template else { return nil }
         var out = ""
         var i = template.startIndex
@@ -236,7 +254,8 @@ enum RuleTemplate {
                 let name = parts.first ?? ""
                 let spec = parts.count > 1 ? parts[1] : ""
                 if let v = values[name] {
-                    out += format(v, spec)
+                    let text = format(v, spec)
+                    out += decimalComma && v is Double ? text.replacingOccurrences(of: ".", with: ",") : text
                 } else {
                     out += "{" + body + "}"
                 }

@@ -10,7 +10,6 @@ import UniformTypeIdentifiers
 // local-only and is removed after LocalStore moves the video into the album.
 struct ImportedPhotoVideo: Transferable {
     let url: URL
-    let recordedDate: Date?
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(contentType: .movie) { video in
@@ -20,9 +19,8 @@ struct ImportedPhotoVideo: Transferable {
             let copy = FileManager.default.temporaryDirectory
                 .appendingPathComponent("movegrow-import-\(UUID().uuidString)")
                 .appendingPathExtension(ext)
-            let sourceDate = try? received.file.resourceValues(forKeys: [.creationDateKey]).creationDate
             try FileManager.default.copyItem(at: received.file, to: copy)
-            return Self(url: copy, recordedDate: sourceDate)
+            return Self(url: copy)
         }
     }
 }

@@ -89,11 +89,11 @@
     }
   },
   "message_placeholders": {
-    "spectral": ["t0", "t1", "dur", "hz", "p2p_cm", "limbs_zh", "limbs_en", "laterality_zh", "laterality_en", "n", "total_s"],
+    "spectral": ["t0", "t1", "dur", "hz", "p2p_cm", "limbs_zh", "limbs_en", "laterality_zh", "laterality_en", "limbs_es", "laterality_es", "n", "total_s"],
     "posture": ["pct", "n", "obs", "true_s", "leg_act"],
-    "posture_side": ["pct", "side_zh", "side_en", "pi", "obs"],
-    "posture_stat": ["median", "side_zh", "side_en", "obs"],
-    "activity": ["side_zh", "side_en", "ai"],
+    "posture_side": ["pct", "side_zh", "side_en", "side_es", "pi", "obs"],
+    "posture_stat": ["median", "side_zh", "side_en", "side_es", "obs"],
+    "activity": ["side_zh", "side_en", "side_es", "ai"],
     "burst": ["n", "dur", "iv"]
   },
   "not_observable_with_coco17": ["finger postures", "fisting", "thumb adduction", "facial expression", "eye deviation", "trunk arching in a top-down view (out of plane)"]

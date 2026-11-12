@@ -11,7 +11,7 @@ struct PoseConnection: Codable, Hashable {
 }
 
 struct PoseArchive: Codable {
-    var schemaVersion: Int = 2
+    var schemaVersion: Int = 3
     var generatedAt: Date = Date()
     var poseEstimator: String
     var processing: String?
@@ -23,6 +23,10 @@ struct PoseArchive: Codable {
     var subjectSelection: String? = "largest-person-box-per-frame"
     var jointNames: [String]
     var connections: [PoseConnection]
+    /// Display width / height of the analysed video (v3).
+    var aspectRatio: Double?
+    /// Recording frame rate of the source video (v3).
+    var captureFrameRate: Double?
     var frames: [MotionSample]
 
     init(durationSeconds: Double, frames: [MotionSample], poseEstimator: String, processing: String) {

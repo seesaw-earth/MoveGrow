@@ -10,7 +10,7 @@ IMPLEMENTED: YOLO26l-pose changed from first-use runtime download to build-time 
 IMPLEMENTED: build script pins the official v8.3.0 asset and SHA-256 4e576806e5ce6cfba83ae456c7814336c0161e92b9cff59e873bf0c8b1efe777, then compiles it into the app bundle.
 IMPLEMENTED: installed app no longer requires network access to fetch its pose model.
 IMPLEMENTED: Apple Vision remains the offline fallback if the bundled YOLO model cannot load.
-IMPLEMENTED: prior single-largest-person selection, raw/processed pose archives, live skeleton, aligned playback skeleton, and skeleton clip export retained.
+IMPLEMENTED: prior single-largest-person selection, raw/processed pose archives, live skeleton and aligned playback skeleton retained; skeleton clip export replaced by the MP4 export (video + optional skeleton + parameter charts + date/age).
 IMPLEMENTED: MoveGrow local Application Support directory with automatic migration from the prior LittleMoves directory.
 IMPLEMENTED: initial opaque 1024x1024 MoveGrow App Icon asset.
 IMPLEMENTED: in-app Privacy overview and Open Source & Licenses views.
@@ -19,3 +19,15 @@ IMPLEMENTED: PRIVACY_POLICY.md and APP_STORE_SUBMISSION.md for publication/submi
 REQUIRES MAC/XCODE VALIDATION: Swift Package resolution, build phase network download, Core ML compilation/bundle placement, code signing, iOS simulator/device build, AVFoundation/Vision/CoreML runtime execution, and TestFlight acceptance.
 
 REQUIRES EXTERNAL RELEASE STEP: publish the exact complete corresponding source in a public repository before App Store distribution and provide a stable source-code URL.
+
+Validation prepared 2026-11-02 — MoveGrow 1.1 (2)
+
+PASSED (Linux, Swift 6.0.3): swift test -c release — rule engine matches the Python reference on 16 fixtures.
+PASSED (Linux): bash Checks/linux/run.sh — unit checks, two-pass pipeline, and 69 end-to-end checks of the
+  analysis queue against framework stand-ins (pre-emption, checkpoint/resume, suspension, watchdog, deletion,
+  orphan cleanup, v1.0 migration, retry, rule-book updates, background tasks).
+PASSED: python3 Checks/static-check.py; swiftc -frontend -parse on every Swift file.
+REVIEWED: Apple-framework code (AVFoundation, Core ML/Vision, BackgroundTasks, SwiftUI) by an independent reviewer; findings fixed.
+REQUIRES MAC/XCODE VALIDATION: everything listed for 1.0, plus the 30 fps/HEVC capture settings, BGContinuedProcessingTask
+  on iOS 26 devices, BGProcessingTask while charging, Core ML on the Neural Engine in the background, and on-device timing
+  of the quick and detailed passes.

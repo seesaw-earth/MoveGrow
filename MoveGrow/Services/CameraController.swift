@@ -36,7 +36,7 @@ final class CameraController: NSObject, ObservableObject, @unchecked Sendable {
         super.init()
         observer = NotificationCenter.default.addObserver(forName:AVCaptureSession.wasInterruptedNotification,object:session,queue:.main) { [weak self] _ in
             self?.stopRecording()
-            self?.error = "Recording was interrupted. Any completed video will be saved."
+            self?.error = tr("Recording was interrupted. Any completed video will be saved.")
         }
     }
     deinit { if let observer { NotificationCenter.default.removeObserver(observer) }; timer?.invalidate() }
@@ -55,31 +55,58 @@ final class CameraController: NSObject, ObservableObject, @unchecked Sendable {
                         defer { self.session.commitConfiguration() }
                         self.session.sessionPreset = .hd1280x720
                         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera,for:.video,position:.back) else {
-                            throw NSError(domain:"Camera",code:1,userInfo:[NSLocalizedDescriptionKey:"Use an iPhone with a rear camera to record."])
+                            throw NSError(domain:"Camera",code:1,userInfo:[NSLocalizedDescriptionKey:tr("Use an iPhone with a rear camera to record.")])
                         }
                         let input = try AVCaptureDeviceInput(device:device)
                         guard self.session.canAddInput(input),self.session.canAddOutput(self.movie),self.session.canAddOutput(self.video) else { throw CocoaError(.featureUnsupported) }
                         self.session.addInput(input)
-                        self.video.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String:kCVPixelFormatType_32BGRA]
+                        // Native 4:2:0 for the live check (Vision reads it directly; no per-frame BGRA conversion).
+                        self.video.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange]
                         self.video.alwaysDiscardsLateVideoFrames = true
                         self.video.setSampleBufferDelegate(self,queue:self.visionQueue)
                         self.session.addOutput(self.video); self.session.addOutput(self.movie)
+                        // HEVC: about half the storage of H.264 at the same quality, hardware-decoded during analysis.
+                        if let c = self.movie.connection(with:.video), self.movie.availableVideoCodecTypes.contains(.hevc) {
+                            self.movie.setOutputSettings([AVVideoCodecKey:AVVideoCodecType.hevc], for:c)
+                        }
                         self.configured = true
                     }
                     if !self.session.isRunning { self.session.startRunning() }
+                    // After the configuration commits and the session runs (a preset resets frame timing and exposure limits).
+                    if let device = (self.session.inputs.first as? AVCaptureDeviceInput)?.device { Self.tuneForMovement(device) }
                     DispatchQueue.main.async { self.running = true }
                 } catch { DispatchQueue.main.async { self.error = error.localizedDescription } }
             }
             }
         }
     }
+    /// 30 fps (enough for the 4–14 Hz rhythm band, brighter in dim rooms and half the analysis work
+    /// of 60 fps) with exposure capped at 1/60 s so quick hand and foot movements stay sharp.
+    private static func tuneForMovement(_ device: AVCaptureDevice) {
+        guard (try? device.lockForConfiguration()) != nil else { return }
+        defer { device.unlockForConfiguration() }
+        let thirty = CMTime(value:1, timescale:30)
+        if device.activeFormat.videoSupportedFrameRateRanges.contains(where: { $0.minFrameRate <= 30 && $0.maxFrameRate >= 30 }) {
+            device.activeVideoMinFrameDuration = thirty
+            device.activeVideoMaxFrameDuration = thirty
+        }
+        let cap = CMTime(value:1, timescale:60)
+        if device.isExposureModeSupported(.continuousAutoExposure),
+           CMTimeCompare(device.activeFormat.maxExposureDuration, cap) > 0,
+           CMTimeCompare(device.activeFormat.minExposureDuration, cap) < 0 {
+            device.exposureMode = .continuousAutoExposure
+            device.activeMaxExposureDuration = cap
+        }
+        if device.isFocusModeSupported(.continuousAutoFocus) { device.focusMode = .continuousAutoFocus }
+    }
+
     func beginRecording() {
         guard running,!recording,!preparing else { return }
         do {
             try LocalFiles.prepare()
             let capacity = try LocalFiles.root.resourceValues(forKeys:[.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage ?? 0
             guard capacity > 150_000_000 else {
-                error = "Free up some storage before recording."; return
+                error = tr("Free up some storage before recording."); return
             }
             let url = LocalFiles.url("recording-\(UUID()).mov")
             if let c = movie.connection(with:.video), c.isVideoRotationAngleSupported(90) { c.videoRotationAngle = 90 }
@@ -99,13 +126,13 @@ final class CameraController: NSObject, ObservableObject, @unchecked Sendable {
 
 
     var guidance: String {
-        if multiplePeople { return "Keep just your baby in view." }
-        if !checks.bodyOK { return "Bring your baby’s whole body into view." }
-        if checks.missingCriticalJoints.contains(.nose) { return "Keep your baby’s head in view." }
-        if !checks.lightingOK { return "Try a brighter, evenly lit spot." }
-        if !checks.limbsOK { return "Keep both hands and feet in view." }
-        if !checks.framingOK { return "Leave more room around the head, hands and feet." }
-        return "You’re all set."
+        if multiplePeople { return tr("Keep just your baby in view.") }
+        if !checks.bodyOK { return tr("Bring your baby’s whole body into view.") }
+        if checks.missingCriticalJoints.contains(.nose) { return tr("Keep your baby’s head in view.") }
+        if !checks.lightingOK { return tr("Try a brighter, evenly lit spot.") }
+        if !checks.limbsOK { return tr("Keep both hands and feet in view.") }
+        if !checks.framingOK { return tr("Leave more room around the head, hands and feet.") }
+        return tr("You’re all set.")
     }
 }
 extension CameraController: AVCaptureFileOutputRecordingDelegate {
@@ -124,7 +151,7 @@ extension CameraController: AVCaptureFileOutputRecordingDelegate {
         DispatchQueue.main.async {
             self.timer?.invalidate();self.timer = nil;self.recording = false;self.preparing = false
             if success { self.completedURL = outputFileURL }
-            else { self.error = error?.localizedDescription ?? "We couldn’t finish this recording. Please try again." }
+            else { self.error = error?.localizedDescription ?? tr("We couldn’t finish this recording. Please try again.") }
         }
     }
 }

@@ -1,4 +1,4 @@
-# MoveGrow 1.0 — App Store / AGPL submission candidate
+# MoveGrow 1.2 — App Store / AGPL submission candidate
 
 **MoveGrow: Baby Milestones** is a private, parent-facing iPhone video journal for recording a baby's movement, visualizing a single-person skeleton, reviewing descriptive movement summaries, and organizing parent-confirmed milestone moments.
 
@@ -20,11 +20,13 @@ The project uses the official `UltralyticsYOLO` Swift package pinned to **8.9.15
 
 The installed app does **not** need to download the YOLO model at first use. Video frames, pose data, reports and milestone records stay on-device unless the user explicitly exports them.
 
+Pose engine: InstantHMR (3D) by default when its models are present at build time, YOLO26l-pose (2D) as the alternative and fallback — see `INSTANTHMR.md`.
+
 ## App identity
 
 - Display name: **MoveGrow**
 - App Store name: **MoveGrow: Baby Milestones**
-- Version/build: **1.0 (1)**
+- Version/build: **1.2 (3)** — see `CHANGES.md`
 - Bundle ID: `com.ziqingshi.movegrow`
 - Developer/seller for the current individual account: **Ziqing Shi**
 
@@ -44,12 +46,39 @@ After GitHub Pages is enabled from `/docs` on the `main` branch:
 
 Tag the exact App Store build (recommended tag: `v1.0.0`) before public release. See `APP_STORE_SUBMISSION.md`.
 
+## How analysis works (1.2)
+
+```
+record / import (≤10 videos, ≤20 min) ─► quick pass (~15 fps) ─► review, suggestions, posture checks (seconds)
+                                       └► full pass (native fps, resumable) ─► rhythm checks        (background)
+pose tracks: <id>.raw.mgpose / <id>.mgpose   observations: <id>.motor.json   review digest: <id>.review.json
+```
+
+- `MoveGrow/Features/Onboarding/`: welcome pages, recording tips, the empty album's first-video card and the recorder's framing checklist; the pictures are drawn with the baby figure (see `Research/onboarding-preview`).
+- `MoveGrow/Features/Review/`: the review player (skeleton, parameter timeline, activity map, navigator) and the visual cards.
+- `MoveGrow/Features/Growth/KinematicTrendsView.swift`: kinematic parameters across videos and days.
+- `MoveGrow/Features/Processing/`: the processing ring (pill and large ring); `Services/BatchImport.swift`.
+- `MoveGrow/Models/L10n.swift`, `MoveGrow/Localizable.xcstrings`, `MoveGrow/InfoPlist.xcstrings`: English, 简体中文 and Español, switchable in the app (`Checks/l10n-check.py` keeps them complete).
+- `MoveGrow/Features/Growth/GrowthExport.swift`: Growth charts as one PNG (share or save to Photos).
+- `MoveGrow/Models/VideoDate.swift` + `Features/Results/VideoDateSheet.swift`: filming dates (from the file, a day, days after birth, or roughly).
+- `MoveGrow/Services/ReviewExport.swift` (layout, tested on Linux) + `ReviewVideoExporter.swift` (AVFoundation / Core Graphics) + `Features/Results/ExportVideoSheet.swift`: MP4 export with skeleton, charts and date. See `Previews/export-preview.png`.
+
+- `MoveGrow/Services/VideoAnalyzer.swift`: decode and inference on two threads (`PoseNet` = direct Core ML).
+- `MoveGrow/Services/LocalStore+Analysis.swift`: the queue (pre-emption, checkpoints, retries).
+- `MoveGrow/Services/BackgroundWork.swift`: background time (iOS 26 continued tasks, BGProcessingTask while charging).
+- `MoveGrow/Motor/`: the rule engine, a Swift port of `Research/motor-rules` (Python reference, the rule book, synthetic fixtures).
+  - Rules are data: `MoveGrow/Motor/Resources/rules.json` and `sources.json`.
+  - `python3 Research/motor-rules/tools/validate_rules.py` checks them.
+
 ## Validation
 
 Run portable checks:
 
 ```bash
-python3 Checks/static-check.py
+python3 Checks/static-check.py   # includes Checks/l10n-check.py (translations complete, placeholders match)
+swift test -c release        # rule engine == Python reference on 16 fixtures (macOS or Linux)
+bash Checks/linux/run.sh     # pipeline + analysis queue end-to-end against framework stand-ins (no Xcode needed)
+bash Checks/linux/ui-typecheck.sh   # onboarding screens + baby figure type-checked against a SwiftUI stand-in
 ```
 
 On macOS with Xcode:

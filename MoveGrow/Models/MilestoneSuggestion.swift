@@ -9,15 +9,8 @@ enum MilestoneSuggestionKind: String, Codable, Hashable, CaseIterable {
 
     var title: String {
         switch self {
-        case .handsToMouth: return "Brings hands to mouth"
-        case .movesArmsAndLegs: return "Moves both arms and legs"
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .handsToMouth: return "hand.raised"
-        case .movesArmsAndLegs: return "figure.child"
+        case .handsToMouth: return tr("Brings hands to mouth")
+        case .movesArmsAndLegs: return tr("Moves both arms and legs")
         }
     }
 }
